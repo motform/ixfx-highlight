@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as find from "./find";
 import * as decorate from "./decorate";
+import { Manager } from "./shared-types";
 
 
 function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext) {
@@ -9,7 +10,8 @@ function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.
 		return;
 	}
 
-	for (const manager of ["state", "settings"]) {
+	const managers: Manager[] = ["state", "settings"];
+	for (const manager of managers) {
 		const identifiers = find.identifiersDestructuredFrom(manager, editor);
 		const ranges = find.rangesMatching(identifiers, editor);
 		decorate.identifiersIn(ranges, manager, editor);

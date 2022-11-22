@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Manager } from "./shared-types";
 
 type Color = `#${string}`;
 
@@ -7,17 +8,28 @@ interface ColorSet {
     dark: Color;
 }
 
-const defaultColors: ColorSet = {
-    light: "#FF5733",
-    dark: "#FFFFFF"
+interface DefaultColors {
+    state: ColorSet;
+    settings: ColorSet
+}
+
+const defaultColors: DefaultColors = {
+    state: {
+        light: "#FF5733",
+        dark: "#FFFFFF",
+    },
+    settings: {
+        light: "#3498DB",
+        dark: "#3498DB"
+    },
 };
 
 /**
  * 
  */
-function decorationTypeFor(manager: string, type: string): vscode.TextEditorDecorationType {
+function decorationTypeFor(manager: Manager, type: string): vscode.TextEditorDecorationType {
     const opacity = (type === "identifier") ? ["10", "12"] : ["10", "20"];
-    const baseColor = defaultColors;
+    const baseColor = defaultColors[manager];
 
     return vscode.window.createTextEditorDecorationType({
         borderWidth: "1px",
@@ -43,7 +55,7 @@ function decorationTypeFor(manager: string, type: string): vscode.TextEditorDeco
     });
 }
 
-export function identifiersIn(ranges: vscode.Range[], manager: string, editor: vscode.TextEditor) {
+export function identifiersIn(ranges: vscode.Range[], manager: Manager, editor: vscode.TextEditor) {
     const decorations: vscode.DecorationOptions[] = [];
     ranges.forEach(range => decorations.push({ range: range, hoverMessage: `Originates from ${manager}.` }));
     editor.setDecorations(decorationTypeFor(manager, "identifier"), decorations);

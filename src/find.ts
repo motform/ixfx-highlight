@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { Manager } from "./shared-types";
 
 export const state = /state|useState|updateState/g;
 export const settings = /settings/g;
@@ -8,15 +9,15 @@ const objectDestructuring = /\{.*\}/g;
 
 
 // TODO
-const dotAccessFrom = (manager: string) => RegExp(`${manager}\.${identifier}`);
-const destructuringFrom = (manager: string) => new RegExp(`((let)|(const)|(var))\\s*\\{([\\w\\s,])*\\}\\s*=\\s*(${manager})`, "g");
+const dotAccessFrom = (manager: Manager) => RegExp(`${manager}\.${identifier}`);
+const destructuringFrom = (manager: Manager) => new RegExp(`((let)|(const)|(var))\\s*\\{([\\w\\s,])*\\}\\s*=\\s*(${manager})`, "g");
 
 
 
 /**
  * Return the unique identifiers in use by the manager.
  */
-export function identifiersDestructuredFrom(manager: string, editor: vscode.TextEditor): Set<string> {
+export function identifiersDestructuredFrom(manager: Manager, editor: vscode.TextEditor): Set<string> {
     const identifiers: Set<string> = new Set();
 
     const matches = editor.document.getText().matchAll(destructuringFrom(manager));
