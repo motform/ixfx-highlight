@@ -149,7 +149,8 @@ const setup = () => {
 
     spawn();
 };
-setup();
+
+
 
 /**
  * Update state
@@ -161,6 +162,7 @@ function updateState(s) {
         ...s
     });
 }
+
 
 
 /*

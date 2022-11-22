@@ -33,7 +33,6 @@ const defaultColors: DefaultColors = {
 function decorationTypeFor(identiferType: IdentiferType, manager: Manager): vscode.TextEditorDecorationType {
     const opacity = (identiferType === "variable") ? ["10", "11"] : ["25", "26"];
     const baseColor = defaultColors[manager];
-    console.log(manager, identiferType, baseColor);
 
     return vscode.window.createTextEditorDecorationType({
         borderWidth: "1px",

@@ -4,6 +4,7 @@ import * as decorate from "./decorate";
 import { Manager, DecorationTypeManager } from "./shared-types";
 
 let decorationTypeManager: DecorationTypeManager;
+let active = false;
 
 function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext, decorationTypeManager: DecorationTypeManager) {
 	if (!editor) {
@@ -27,27 +28,42 @@ function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.
 	}
 }
 
+function triggerUpdateHighlight(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext, decorationTypeManager: DecorationTypeManager) {
+	if (active) updateHighlight(editor, context, decorationTypeManager);
+}
+
+function disableHighlights() {
+	decorate.remove(decorationTypeManager);
+	active = false;
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	const activeEditor = vscode.window.activeTextEditor;
-	decorationTypeManager = decorate.makeDecorationTypeManager(); // NOTE: We are currently only making this at activation time, which means that we don't respond to colorTheme changes. There is probably an event we can listen to for that later.
 
-	if (activeEditor) {
-		updateHighlight(activeEditor, context, decorationTypeManager);
-	}
-
-	vscode.window.onDidChangeActiveTextEditor(editor => updateHighlight(editor, context, decorationTypeManager), null, context.subscriptions);
+	vscode.window.onDidChangeActiveTextEditor(editor => {
+		triggerUpdateHighlight(editor, context, decorationTypeManager);
+	}, null, context.subscriptions);
 
 	vscode.workspace.onDidChangeTextDocument(event => {
 		if (activeEditor && event.document === activeEditor.document) {
-			updateHighlight(activeEditor, context, decorationTypeManager);
+			triggerUpdateHighlight(activeEditor, context, decorationTypeManager);
 		}
 	}, null, context.subscriptions);
 
 	context.subscriptions.push(
+
 		vscode.commands.registerCommand("ixfx-highlight.highlight", () => {
-			// vscode.window.showInformationMessage("The highlight function!");
+			if (!active) {
+				decorationTypeManager = decorate.makeDecorationTypeManager(); // NOTE: We are currently only making this at activation time, which means that we don't respond to colorTheme changes. There is probably an event we can listen to for that later.
+				active = true;
+			}
 			updateHighlight(activeEditor, context, decorationTypeManager);
 		}),
+
+		vscode.commands.registerCommand("ixfx-highlight.disable", () => {
+			disableHighlights();
+		}),
+
 	);
 }
 

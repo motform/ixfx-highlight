@@ -17,7 +17,11 @@
     "commands": [
       {
         "command": "ixfx-highlight.highlight",
-        "title": "ixfx Highlight"
+        "title": "ixfx: Enable highlights"
+      },
+      {
+        "command": "ixfx-highlight.disable",
+        "title": "ixfx: Disable highlights"
       }
     ]
   },
