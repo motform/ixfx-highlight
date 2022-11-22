@@ -3,6 +3,7 @@ import * as find from "./find";
 import * as decorate from "./decorate";
 import { Manager, DecorationTypeManager } from "./shared-types";
 
+let decorationTypeManager: DecorationTypeManager;
 
 function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext, decorationTypeManager: DecorationTypeManager) {
 	if (!editor) {
@@ -28,7 +29,7 @@ function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.
 
 export function activate(context: vscode.ExtensionContext) {
 	const activeEditor = vscode.window.activeTextEditor;
-	let decorationTypeManager = decorate.makeDecorationTypeManager(); // NOTE: We are currently only making this at activation time, which means that we don't respond to colorTheme changes. There is probably an event we can listen to for that later.
+	decorationTypeManager = decorate.makeDecorationTypeManager(); // NOTE: We are currently only making this at activation time, which means that we don't respond to colorTheme changes. There is probably an event we can listen to for that later.
 
 	if (activeEditor) {
 		updateHighlight(activeEditor, context, decorationTypeManager);
@@ -52,5 +53,5 @@ export function activate(context: vscode.ExtensionContext) {
 
 // This method is called when your extension is deactivated
 export function deactivate() {
-	// TODO: Remove decorations
+	decorate.remove(decorationTypeManager);
 }

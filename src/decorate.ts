@@ -77,15 +77,18 @@ export function makeDecorationTypeManager(): DecorationTypeManager {
     };
 }
 
-export function remove() {
-
+export function remove(decorationTypeManager: DecorationTypeManager) {
+    decorationTypeManager.settings.manager.dispose();
+    decorationTypeManager.settings.variable.dispose();
+    decorationTypeManager.state.manager.dispose();
+    decorationTypeManager.state.variable.dispose();
 }
 
 
 /*
-BUG: decorations overlap/keep geeting added
-see: https://github.com/microsoft/vscode-extension-samples/issues/22
-
-"Most issues I've seen in code that uses this API are around using the wrong instance of decType 
-(i.e. creating new decoration types every time decorations would be updated instead of reusing the same instance)."
+ * BUG: decorations overlap/keep geeting added
+ * see: https://github.com/microsoft/vscode-extension-samples/issues/22
+ * 
+ * "Most issues I've seen in code that uses this API are around using the wrong instance of decType 
+ * (i.e. creating new decoration types every time decorations would be updated instead of reusing the same instance)."
  */
