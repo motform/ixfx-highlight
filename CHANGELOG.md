@@ -1,9 +1,5 @@
 # Change Log
 
-All notable changes to the "ixfx-highlight" extension will be documented in this file.
+## [1.0]
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+- Initial release, see the README for overview and details.

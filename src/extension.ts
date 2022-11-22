@@ -4,7 +4,7 @@ import * as decorate from "./decorate";
 import { Manager, DecorationTypeManager } from "./shared-types";
 
 let decorationTypeManager: DecorationTypeManager;
-let active = false;
+let active = false; // Refactor this into something transcational/a centralised state
 
 function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext, decorationTypeManager: DecorationTypeManager) {
 	if (!editor) {
