@@ -11,10 +11,22 @@ function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.
 	}
 
 	const managers: Manager[] = ["state", "settings"];
+
+
 	for (const manager of managers) {
-		const identifiers = find.identifiersDestructuredFrom(manager, editor);
-		const ranges = find.rangesMatching(identifiers, editor);
-		decorate.identifiersIn(ranges, manager, editor);
+		{ // Decorate variables 
+			const variables = find.variablesDestructuredFrom(manager, editor);
+			const ranges = find.rangesMatching(variables, editor);
+			decorate.identifiersIn(ranges, "variable", manager, editor);
+		}
+
+		// Decorate managers 
+		{
+			const ranges = find.rangesMatching(find[manager], editor);
+			console.log(manager, ranges);
+			decorate.identifiersIn(ranges, "manager", manager, editor);
+		}
+
 	}
 }
 

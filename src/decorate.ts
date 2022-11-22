@@ -3,6 +3,8 @@ import { Manager } from "./shared-types";
 
 type Color = `#${string}`;
 
+type IdentiferType = "variable" | "manager";
+
 interface ColorSet {
     light: Color;
     dark: Color;
@@ -16,7 +18,7 @@ interface DefaultColors {
 const defaultColors: DefaultColors = {
     state: {
         light: "#FF5733",
-        dark: "#FFFFFF",
+        dark: "#FF5733",
     },
     settings: {
         light: "#3498DB",
@@ -25,19 +27,19 @@ const defaultColors: DefaultColors = {
 };
 
 /**
- * 
+ * Return decoration appropriate for manager and type.
  */
-function decorationTypeFor(manager: Manager, type: string): vscode.TextEditorDecorationType {
-    const opacity = (type === "identifier") ? ["10", "12"] : ["10", "20"];
+function decorationTypeFor(identiferType: IdentiferType, manager: Manager,): vscode.TextEditorDecorationType {
+    const opacity = (identiferType === "variable") ? ["10", "11"] : ["25", "26"];
     const baseColor = defaultColors[manager];
+    console.log(manager, identiferType, baseColor);
 
     return vscode.window.createTextEditorDecorationType({
         borderWidth: "1px",
         borderStyle: "solid",
         borderRadius: "3px",
-        // fontWeight: "bold",
-        // overviewRulerColor: "blue",
-        // overviewRulerLane: vscode.OverviewRulerLane.Right,
+        overviewRulerColor: baseColor.light,
+        overviewRulerLane: vscode.OverviewRulerLane.Right,
 
         // https://vshaxe.github.io/vscode-extern/vscode/ThemableDecorationAttachmentRenderOptions.html
         /* 	before: {
@@ -55,8 +57,8 @@ function decorationTypeFor(manager: Manager, type: string): vscode.TextEditorDec
     });
 }
 
-export function identifiersIn(ranges: vscode.Range[], manager: Manager, editor: vscode.TextEditor) {
+export function identifiersIn(ranges: vscode.Range[], identiferType: IdentiferType, manager: Manager, editor: vscode.TextEditor) {
     const decorations: vscode.DecorationOptions[] = [];
     ranges.forEach(range => decorations.push({ range: range, hoverMessage: `Originates from ${manager}.` }));
-    editor.setDecorations(decorationTypeFor(manager, "identifier"), decorations);
+    editor.setDecorations(decorationTypeFor(identiferType, manager), decorations);
 }

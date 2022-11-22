@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { Manager } from "./shared-types";
 
-export const state = /state|useState|updateState/g;
-export const settings = /settings/g;
+export const state = ["state", "useState", "updateState"];
+export const settings = ["settings", "useSettings", "updateSettings"];
 
 const identifier = /[a-zA-Z]([a-zA-Z]|\d)*/g;
 const objectDestructuring = /\{.*\}/g;
@@ -12,33 +12,30 @@ const objectDestructuring = /\{.*\}/g;
 const dotAccessFrom = (manager: Manager) => RegExp(`${manager}\.${identifier}`);
 const destructuringFrom = (manager: Manager) => new RegExp(`((let)|(const)|(var))\\s*\\{([\\w\\s,])*\\}\\s*=\\s*(${manager})`, "g");
 
-
-
 /**
- * Return the unique identifiers in use by the manager.
+ * Return the unique variables in use by the manager.
  */
-export function identifiersDestructuredFrom(manager: Manager, editor: vscode.TextEditor): Set<string> {
-    const identifiers: Set<string> = new Set();
+export function variablesDestructuredFrom(manager: Manager, editor: vscode.TextEditor): Set<string> {
+    const variables: Set<string> = new Set();
 
     const matches = editor.document.getText().matchAll(destructuringFrom(manager));
     for (const match of matches) {
         const destructuringSite = match[0].match(objectDestructuring);
         if (!destructuringSite) continue;
 
-        const destucturedIdentifiers = destructuringSite[0].matchAll(identifier);
-        for (const identifer of destucturedIdentifiers) identifiers.add(identifer[0]);
+        const destucturedVariables = destructuringSite[0].matchAll(identifier);
+        for (const variable of destucturedVariables) variables.add(variable[0]);
     }
 
-    return identifiers;
+    return variables;
 }
-
 
 /**
  * Return a RegExp or-ing the strings in strs.
  * Example: ["foo", "bar"] => /foo|bar/g
  */
 function concatOrRegex(strs: Iterable<string>): RegExp {
-    const re = Array.from(strs).map(s => `${s}(\\:|\\.|\\,|\\s|\\[|\\{){1}`).join("|");
+    const re = Array.from(strs).map(s => `${s}(\\:|\\.|\\,|\\s|\\[|\\{|\\;|\\(){1}`).join("|");
     return new RegExp(re, "g");
 }
 
