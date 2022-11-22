@@ -31,7 +31,7 @@ const defaultColors: DefaultColors = {
  * Return decoration appropriate for manager and type.
  */
 function decorationTypeFor(identiferType: IdentiferType, manager: Manager): vscode.TextEditorDecorationType {
-    const opacity = (identiferType === "variable") ? ["10", "11"] : ["25", "26"];
+    const opacity = (identiferType === "variable") ? ["10", "11"] : ["25", "26"]; // TODO Make a bit more... robust.
     const baseColor = defaultColors[manager];
 
     return vscode.window.createTextEditorDecorationType({
@@ -76,18 +76,14 @@ export function makeDecorationTypeManager(): DecorationTypeManager {
     };
 }
 
+/**
+ * Dispose of the decorationTypes. You cannot re-use disposed types with `editor.setDecorations`, you will have to define new ones.
+ * These are hard coded as TS got mad about nested Object.entries().
+ */
 export function remove(decorationTypeManager: DecorationTypeManager) {
+    if (!decorationTypeManager) return;
     decorationTypeManager.settings.manager.dispose();
     decorationTypeManager.settings.variable.dispose();
     decorationTypeManager.state.manager.dispose();
     decorationTypeManager.state.variable.dispose();
 }
-
-
-/*
- * BUG: decorations overlap/keep geeting added
- * see: https://github.com/microsoft/vscode-extension-samples/issues/22
- * 
- * "Most issues I've seen in code that uses this API are around using the wrong instance of decType 
- * (i.e. creating new decoration types every time decorations would be updated instead of reusing the same instance)."
- */

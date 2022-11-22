@@ -159,6 +159,7 @@ const setup = () => {
 function updateState(s) {
     state = Object.freeze({
         ...state,
+
         ...s
     });
 }

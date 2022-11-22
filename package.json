@@ -2,7 +2,7 @@
   "name": "ixfx-highlight",
   "displayName": "ixfx-highlight",
   "description": "Prefer flashlights over christmas trees.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.73.0"
   },
@@ -10,18 +10,23 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:ixfx-highlight.highlight"
+    "onCommand:ixfx-highlight.enable",
+    "onCommand:ixfx-highlight.toggle"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "ixfx-highlight.highlight",
+        "command": "ixfx-highlight.enable",
         "title": "ixfx: Enable highlights"
       },
       {
         "command": "ixfx-highlight.disable",
         "title": "ixfx: Disable highlights"
+      },
+      {
+        "command": "ixfx-highlight.toggle",
+        "title": "ixfx: Toggle highlights"
       }
     ]
   },
