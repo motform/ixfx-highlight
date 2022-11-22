@@ -4,6 +4,8 @@ import * as Dom from '../../ixfx/dom.js';
 import { Forces } from '../../ixfx/modulation.js';
 import { Points, Rects } from '../../ixfx/geometry.js';
 import * as Random from '../../ixfx/random.js';
+import { assert } from 'console';
+import { DiffieHellmanGroup } from 'crypto';
 
 const settings = Object.freeze({
     maxRadius: 50,
@@ -159,3 +161,8 @@ function updateState(s) {
         ...s
     });
 }
+
+
+/*
+This is where the real "example" stops and my trying to fix things start.
+*/

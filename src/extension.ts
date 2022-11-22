@@ -1,45 +1,56 @@
 import * as vscode from "vscode";
 import * as find from "./find";
 import * as decorate from "./decorate";
-import { Manager } from "./shared-types";
+import { Manager, DecorationTypeManager } from "./shared-types";
 
 
-function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext) {
+function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext, decorationTypeManager: DecorationTypeManager) {
 	if (!editor) {
 		console.error("No editor found in context", context);
 		return;
 	}
 
 	const managers: Manager[] = ["state", "settings"];
-
-
 	for (const manager of managers) {
 		{ // Decorate variables 
 			const variables = find.variablesDestructuredFrom(manager, editor);
 			const ranges = find.rangesMatching(variables, editor);
-			decorate.identifiersIn(ranges, "variable", manager, editor);
+			decorate.identifiersIn(ranges, decorationTypeManager[manager].variable, manager, editor);
 		}
 
-		// Decorate managers 
-		{
+		{ // Decorate managers 
 			const ranges = find.rangesMatching(find[manager], editor);
 			console.log(manager, ranges);
-			decorate.identifiersIn(ranges, "manager", manager, editor);
+			decorate.identifiersIn(ranges, decorationTypeManager[manager].manager, manager, editor);
 		}
-
 	}
 }
 
 export function activate(context: vscode.ExtensionContext) {
 	const activeEditor = vscode.window.activeTextEditor;
+	let decorationTypeManager = decorate.makeDecorationTypeManager(); // NOTE: We are currently only making this at activation time, which means that we don't respond to colorTheme changes. There is probably an event we can listen to for that later.
+
+	if (activeEditor) {
+		updateHighlight(activeEditor, context, decorationTypeManager);
+	}
+
+	vscode.window.onDidChangeActiveTextEditor(editor => updateHighlight(editor, context, decorationTypeManager), null, context.subscriptions);
+
+	vscode.workspace.onDidChangeTextDocument(event => {
+		if (activeEditor && event.document === activeEditor.document) {
+			updateHighlight(activeEditor, context, decorationTypeManager);
+		}
+	}, null, context.subscriptions);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand("ixfx-highlight.highlight", () => {
 			// vscode.window.showInformationMessage("The highlight function!");
-			updateHighlight(activeEditor, context);
+			updateHighlight(activeEditor, context, decorationTypeManager);
 		}),
 	);
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() { }
+export function deactivate() {
+	// TODO: Remove decorations
+}

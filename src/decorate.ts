@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Manager } from "./shared-types";
+import { Manager, DecorationTypeManager } from "./shared-types";
 
 type Color = `#${string}`;
 
@@ -26,10 +26,11 @@ const defaultColors: DefaultColors = {
     },
 };
 
+
 /**
  * Return decoration appropriate for manager and type.
  */
-function decorationTypeFor(identiferType: IdentiferType, manager: Manager,): vscode.TextEditorDecorationType {
+function decorationTypeFor(identiferType: IdentiferType, manager: Manager): vscode.TextEditorDecorationType {
     const opacity = (identiferType === "variable") ? ["10", "11"] : ["25", "26"];
     const baseColor = defaultColors[manager];
     console.log(manager, identiferType, baseColor);
@@ -57,8 +58,34 @@ function decorationTypeFor(identiferType: IdentiferType, manager: Manager,): vsc
     });
 }
 
-export function identifiersIn(ranges: vscode.Range[], identiferType: IdentiferType, manager: Manager, editor: vscode.TextEditor) {
+export function identifiersIn(ranges: vscode.Range[], decorationType: vscode.TextEditorDecorationType, manager: Manager, editor: vscode.TextEditor) {
     const decorations: vscode.DecorationOptions[] = [];
     ranges.forEach(range => decorations.push({ range: range, hoverMessage: `Originates from ${manager}.` }));
-    editor.setDecorations(decorationTypeFor(identiferType, manager), decorations);
+    editor.setDecorations(decorationType, decorations);
 }
+
+export function makeDecorationTypeManager(): DecorationTypeManager {
+    return {
+        settings: {
+            manager: decorationTypeFor("manager", "settings"),
+            variable: decorationTypeFor("variable", "settings")
+        },
+        state: {
+            manager: decorationTypeFor("manager", "state"),
+            variable: decorationTypeFor("variable", "state"),
+        },
+    };
+}
+
+export function remove() {
+
+}
+
+
+/*
+BUG: decorations overlap/keep geeting added
+see: https://github.com/microsoft/vscode-extension-samples/issues/22
+
+"Most issues I've seen in code that uses this API are around using the wrong instance of decType 
+(i.e. creating new decoration types every time decorations would be updated instead of reusing the same instance)."
+ */
