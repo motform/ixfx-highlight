@@ -3,14 +3,8 @@ import * as find from "./find";
 import * as decorate from "./decorate";
 import { Manager, DecorationTypeManager } from "./shared-types";
 
-
-// NOTE: It might be an idea to put `editor` in the state, as we pass it around to everything.
-//       Dito maybe context?
-//       Would have to maybe make things optional as well, with the fancy syntax etc
 interface State {
     active: boolean;
-    // context?: vscode.ExtensionContext;
-    // editor?: vscode.TextEditor;
     decorationTypeManager: DecorationTypeManager;
     statusBarItem: vscode.StatusBarItem;
 }
@@ -25,7 +19,7 @@ function updateState(newState: Partial<State>): void {
     state = Object.freeze({ ...state, ...newState });
 }
 
-function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext): void {
+function updateHighlight(context: vscode.ExtensionContext, editor?: vscode.TextEditor): void {
     if (!editor) {
         console.error("No editor found in context", context);
         return;
@@ -46,8 +40,8 @@ function updateHighlight(editor: vscode.TextEditor | undefined, context: vscode.
     }
 }
 
-function triggerUpdateHighlight(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext): void {
-    if (state.active) updateHighlight(editor, context);
+function triggerUpdateHighlight(context: vscode.ExtensionContext, editor?: vscode.TextEditor): void {
+    if (state.active) updateHighlight(context, editor);
 }
 
 function disableHighlights(): void {
@@ -55,14 +49,14 @@ function disableHighlights(): void {
     updateState({ active: false });
 }
 
-function enableHighlights(editor: vscode.TextEditor | undefined, context: vscode.ExtensionContext): void {
+function enableHighlights(context: vscode.ExtensionContext, editor?: vscode.TextEditor): void {
     if (!state.active) {
         updateState({
             decorationTypeManager: decorate.makeDecorationTypeManager(),  // NOTE: We are currently only making this at activation time, which means that we don't respond to colorTheme changes. There is probably an event we can listen to for that later.
             active: true,
         });
     }
-    updateHighlight(editor, context);
+    updateHighlight(context, editor);
 }
 
 function updateStatusBarItem(): void {
@@ -80,19 +74,19 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     vscode.window.onDidChangeActiveTextEditor(editor => {
-        triggerUpdateHighlight(editor, context);
+        triggerUpdateHighlight(context, editor);
     }, null, context.subscriptions);
 
     vscode.workspace.onDidChangeTextDocument(event => {
         if (activeEditor && event.document === activeEditor.document) {
-            triggerUpdateHighlight(activeEditor, context);
+            triggerUpdateHighlight(context, activeEditor);
         }
     }, null, context.subscriptions);
 
     context.subscriptions.push(
 
         vscode.commands.registerCommand("ixfx-highlight.enable", () => {
-            enableHighlights(activeEditor, context);
+            enableHighlights(context, activeEditor);
             updateStatusBarItem();
         }),
 
@@ -103,7 +97,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         vscode.commands.registerCommand("ixfx-highlight.toggle", () => {
             if (state.active) disableHighlights();
-            else enableHighlights(activeEditor, context);
+            else enableHighlights(context, activeEditor);
 
             updateStatusBarItem();
         }),
@@ -111,7 +105,6 @@ export function activate(context: vscode.ExtensionContext) {
     );
 }
 
-// This method is called when your extension is deactivated
 export function deactivate(): void {
     decorate.remove(state.decorationTypeManager);
     state.statusBarItem.hide();
