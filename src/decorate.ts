@@ -18,11 +18,11 @@ interface DefaultColors {
 const defaultColors: DefaultColors = {
     state: {
         light: "#FF5733",
-        dark: "#FF5733",
+        dark: "#FF8166",
     },
     settings: {
         light: "#3498DB",
-        dark: "#3498DB"
+        dark: "#5FAEE3",
     },
 };
 
@@ -68,7 +68,7 @@ export function makeDecorationTypeManager(): DecorationTypeManager {
     return {
         settings: {
             manager: decorationTypeFor("manager", "settings"),
-            variable: decorationTypeFor("variable", "settings")
+            variable: decorationTypeFor("variable", "settings"),
         },
         state: {
             manager: decorationTypeFor("manager", "state"),
@@ -83,6 +83,7 @@ export function makeDecorationTypeManager(): DecorationTypeManager {
  */
 export function remove(decorationTypeManager: DecorationTypeManager): void {
     if (!decorationTypeManager) return;
+
     decorationTypeManager.settings.manager.dispose();
     decorationTypeManager.settings.variable.dispose();
     decorationTypeManager.state.manager.dispose();
@@ -93,4 +94,8 @@ function gray(): vscode.TextEditorDecorationType {
     return vscode.window.createTextEditorDecorationType({
         color: "gray",
     });
+}
+
+export function muteOtherColors() {
+
 }

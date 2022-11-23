@@ -7,7 +7,6 @@ interface State {
     active: boolean;
     editor?: vscode.TextEditor;
     context?: vscode.ExtensionContext;
-    colorTheme: vscode.ColorThemeKind;
     decorationTypeManager: DecorationTypeManager;
     statusBarItem: vscode.StatusBarItem;
 }
@@ -55,13 +54,7 @@ function disableHighlights(): void {
 }
 
 function enableHighlights(): void {
-    if (!state.active) {
-        updateState({
-            decorationTypeManager: decorate.makeDecorationTypeManager(),  // NOTE: We are currently only making this at activation time, which means that we don't respond to colorTheme changes. There is probably an event we can listen to for that later.
-            active: true,
-        });
-    }
-
+    if (!state.active) updateState({ active: true, decorationTypeManager: decorate.makeDecorationTypeManager() });
     updateHighlight();
 }
 
@@ -85,8 +78,8 @@ export function activate(context: vscode.ExtensionContext) {
         triggerUpdateHighlight();
     }, null, context.subscriptions);
 
-    vscode.window.onDidChangeActiveColorTheme(colorThemeEvent => {
-        updateState({ colorTheme: colorThemeEvent.kind });
+    vscode.window.onDidChangeActiveColorTheme(() => {
+        updateState({ decorationTypeManager: decorate.makeDecorationTypeManager() });
         triggerUpdateHighlight();
     }, null, context.subscriptions);
 
