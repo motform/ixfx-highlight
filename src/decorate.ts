@@ -40,7 +40,6 @@ function decorationTypeFor(identiferType: IdentiferType, manager: Manager): vsco
         borderRadius: "3px",
         overviewRulerColor: baseColor.light,
         overviewRulerLane: vscode.OverviewRulerLane.Right,
-
         // https://vshaxe.github.io/vscode-extern/vscode/ThemableDecorationAttachmentRenderOptions.html
         /* 	before: {
                 contentIconPath: context.asAbsolutePath("/resources/clock-fill.svg"),
@@ -86,4 +85,15 @@ export function remove(decorationTypeManager: DecorationTypeManager) {
     decorationTypeManager.settings.variable.dispose();
     decorationTypeManager.state.manager.dispose();
     decorationTypeManager.state.variable.dispose();
+}
+
+
+
+
+
+function gray(): vscode.TextEditorDecorationType {
+
+    return vscode.window.createTextEditorDecorationType({
+        color: "gray",
+    });
 }
