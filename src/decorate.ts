@@ -26,12 +26,19 @@ const defaultColors: DefaultColors = {
     },
 };
 
+/**
+ * Return a hexadecimal CSS color with opacity appended.
+ * It really does very little.
+ */
+function hexColorWithOpacity(hexColor: Color, opacity: number): Color {
+    return `${hexColor}${opacity.toString()}`;
+}
 
 /**
  * Return decoration appropriate for manager and type.
  */
 function decorationTypeFor(identiferType: IdentiferType, manager: Manager): vscode.TextEditorDecorationType {
-    const opacity = (identiferType === "variable") ? ["10", "11"] : ["25", "26"]; // TODO Make a bit more... robust.
+    const opacity = (identiferType === "variable") ? [10, 11] : [25, 26]; // TODO Make a bit more... robust.
     const baseColor = defaultColors[manager];
 
     return vscode.window.createTextEditorDecorationType({
@@ -40,23 +47,18 @@ function decorationTypeFor(identiferType: IdentiferType, manager: Manager): vsco
         borderRadius: "3px",
         overviewRulerColor: baseColor.light,
         overviewRulerLane: vscode.OverviewRulerLane.Right,
-        // https://vshaxe.github.io/vscode-extern/vscode/ThemableDecorationAttachmentRenderOptions.html
-        /* 	before: {
-                contentIconPath: context.asAbsolutePath("/resources/clock-fill.svg"),
-                margin: "4px"
-            }, */
         light: {
-            borderColor: `${baseColor.light}${opacity[1]}`,
-            backgroundColor: `${baseColor.light}${opacity[0]}`
+            borderColor: hexColorWithOpacity(baseColor.light, opacity[1]),
+            backgroundColor: hexColorWithOpacity(baseColor.light, opacity[0]),
         },
         dark: {
-            borderColor: `${baseColor.light}${opacity[1]}`,
-            backgroundColor: `${baseColor.light}${opacity[0]}`
+            borderColor: hexColorWithOpacity(baseColor.dark, opacity[1]),
+            backgroundColor: hexColorWithOpacity(baseColor.dark, opacity[0]),
         },
     });
 }
 
-export function identifiersIn(ranges: vscode.Range[], decorationType: vscode.TextEditorDecorationType, manager: Manager, editor: vscode.TextEditor) {
+export function identifiersIn(ranges: vscode.Range[], decorationType: vscode.TextEditorDecorationType, manager: Manager, editor: vscode.TextEditor): void {
     const decorations: vscode.DecorationOptions[] = [];
     ranges.forEach(range => decorations.push({ range: range, hoverMessage: `Originates from ${manager}.` }));
     editor.setDecorations(decorationType, decorations);
@@ -79,7 +81,7 @@ export function makeDecorationTypeManager(): DecorationTypeManager {
  * Dispose of the decorationTypes. You cannot re-use disposed types with `editor.setDecorations`, you will have to define new ones.
  * These are hard coded as TS got mad about nested Object.entries().
  */
-export function remove(decorationTypeManager: DecorationTypeManager) {
+export function remove(decorationTypeManager: DecorationTypeManager): void {
     if (!decorationTypeManager) return;
     decorationTypeManager.settings.manager.dispose();
     decorationTypeManager.settings.variable.dispose();
@@ -87,12 +89,7 @@ export function remove(decorationTypeManager: DecorationTypeManager) {
     decorationTypeManager.state.variable.dispose();
 }
 
-
-
-
-
 function gray(): vscode.TextEditorDecorationType {
-
     return vscode.window.createTextEditorDecorationType({
         color: "gray",
     });
