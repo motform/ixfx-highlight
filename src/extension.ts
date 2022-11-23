@@ -5,12 +5,16 @@ import { Manager, DecorationTypeManager } from "./shared-types";
 
 interface State {
     active: boolean;
+    editor?: vscode.TextEditor;
+    context?: vscode.ExtensionContext;
+    colorTheme: vscode.ColorThemeKind;
     decorationTypeManager: DecorationTypeManager;
     statusBarItem: vscode.StatusBarItem;
 }
 
 let state: State = Object.freeze({
     active: false,
+    colorTheme: vscode.window.activeColorTheme.kind,
     decorationTypeManager: decorate.makeDecorationTypeManager(),
     statusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100),
 });
@@ -19,7 +23,8 @@ function updateState(newState: Partial<State>): void {
     state = Object.freeze({ ...state, ...newState });
 }
 
-function updateHighlight(context: vscode.ExtensionContext, editor?: vscode.TextEditor): void {
+function updateHighlight(): void {
+    const { editor, context, decorationTypeManager } = state;
     if (!editor) {
         console.error("No editor found in context", context);
         return;
@@ -30,18 +35,18 @@ function updateHighlight(context: vscode.ExtensionContext, editor?: vscode.TextE
         { // Decorate variables 
             const variables = find.variablesDestructuredFrom(manager, editor);
             const ranges = find.rangesMatching(variables, editor);
-            decorate.identifiersIn(ranges, state.decorationTypeManager[manager].variable, manager, editor);
+            decorate.identifiersIn(ranges, decorationTypeManager[manager].variable, manager, editor);
         }
 
         { // Decorate managers 
             const ranges = find.rangesMatching(find[manager], editor);
-            decorate.identifiersIn(ranges, state.decorationTypeManager[manager].manager, manager, editor);
+            decorate.identifiersIn(ranges, decorationTypeManager[manager].manager, manager, editor);
         }
     }
 }
 
-function triggerUpdateHighlight(context: vscode.ExtensionContext, editor?: vscode.TextEditor): void {
-    if (state.active) updateHighlight(context, editor);
+function triggerUpdateHighlight(): void {
+    if (state.active) updateHighlight();
 }
 
 function disableHighlights(): void {
@@ -49,23 +54,25 @@ function disableHighlights(): void {
     updateState({ active: false });
 }
 
-function enableHighlights(context: vscode.ExtensionContext, editor?: vscode.TextEditor): void {
+function enableHighlights(): void {
     if (!state.active) {
         updateState({
             decorationTypeManager: decorate.makeDecorationTypeManager(),  // NOTE: We are currently only making this at activation time, which means that we don't respond to colorTheme changes. There is probably an event we can listen to for that later.
             active: true,
         });
     }
-    updateHighlight(context, editor);
+
+    updateHighlight();
 }
 
 function updateStatusBarItem(): void {
-    state.statusBarItem.text = (state.active) ? `$(eye-closed) ixfx` : `$(eye) ixfx`;
-    state.statusBarItem.show();
+    const { statusBarItem } = state;
+    statusBarItem.text = (state.active) ? `$(eye-closed) ixfx` : `$(eye) ixfx`;
+    statusBarItem.show();
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    const activeEditor = vscode.window.activeTextEditor;
+    updateState({ context: context, editor: vscode.window.activeTextEditor });
 
     { // Status bar item
         state.statusBarItem.command = "ixfx-highlight.toggle";
@@ -74,19 +81,25 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     vscode.window.onDidChangeActiveTextEditor(editor => {
-        triggerUpdateHighlight(context, editor);
+        if (editor) updateState({ editor: editor });
+        triggerUpdateHighlight();
+    }, null, context.subscriptions);
+
+    vscode.window.onDidChangeActiveColorTheme(colorThemeEvent => {
+        updateState({ colorTheme: colorThemeEvent.kind });
+        triggerUpdateHighlight();
     }, null, context.subscriptions);
 
     vscode.workspace.onDidChangeTextDocument(event => {
-        if (activeEditor && event.document === activeEditor.document) {
-            triggerUpdateHighlight(context, activeEditor);
+        if (state.editor && event.document === state.editor.document) {
+            triggerUpdateHighlight();
         }
     }, null, context.subscriptions);
 
     context.subscriptions.push(
 
         vscode.commands.registerCommand("ixfx-highlight.enable", () => {
-            enableHighlights(context, activeEditor);
+            enableHighlights();
             updateStatusBarItem();
         }),
 
@@ -96,16 +109,14 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         vscode.commands.registerCommand("ixfx-highlight.toggle", () => {
-            if (state.active) disableHighlights();
-            else enableHighlights(context, activeEditor);
-
+            state.active ? disableHighlights() : enableHighlights();
             updateStatusBarItem();
         }),
-
     );
 }
 
 export function deactivate(): void {
-    decorate.remove(state.decorationTypeManager);
-    state.statusBarItem.hide();
+    const { statusBarItem, decorationTypeManager } = state;
+    decorate.remove(decorationTypeManager);
+    statusBarItem.hide();
 }
