@@ -169,3 +169,5 @@ function updateState(s) {
 /*
 This is where the real "example" stops and my trying to fix things start.
 */
+
+state.bounds
