@@ -3,7 +3,6 @@ import * as find from "./find";
 import * as decorate from "./decorate";
 import { Manager, DecorationTypeManager } from "./shared-types";
 
-
 interface State {
 	active: boolean;
 	decorationTypeManager: DecorationTypeManager;
@@ -69,7 +68,6 @@ export function activate(context: vscode.ExtensionContext) {
 	const activeEditor = vscode.window.activeTextEditor;
 
 	{ // Status bar item
-		// updateState({ statusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100) }); // XXX
 		state.statusBarItem.command = "ixfx-highlight.toggle";
 		context.subscriptions.push(state.statusBarItem);
 		updateStatusBarItem();
@@ -97,13 +95,12 @@ export function activate(context: vscode.ExtensionContext) {
 			updateStatusBarItem();
 		}),
 
-		vscode.commands.
-			registerCommand("ixfx-highlight.toggle", () => {
-				if (state.active) disableHighlights();
-				else enableHighlights(activeEditor, context);
+		vscode.commands.registerCommand("ixfx-highlight.toggle", () => {
+			if (state.active) disableHighlights();
+			else enableHighlights(activeEditor, context);
 
-				updateStatusBarItem();
-			}),
+			updateStatusBarItem();
+		}),
 
 	);
 }

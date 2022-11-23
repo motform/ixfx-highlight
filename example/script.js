@@ -82,6 +82,7 @@ const useState = () => {
     const { things, bounds } = state;
     const { liquid, maxRadius, hue } = settings;
 
+    console.log(bounds); bounds;
     /* * @type { CanvasRenderingContext2D | null | undefined } */
     const ctx = canvas?.getContext(`2d`);
     if (!ctx) return;

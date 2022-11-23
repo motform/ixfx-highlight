@@ -7,7 +7,6 @@ export const settings = ["settings", "useSettings", "updateSettings"];
 const identifier = /[a-zA-Z]([a-zA-Z]|\d)*/g;
 const objectDestructuring = /\{.*\}/g;
 
-
 // TODO
 const dotAccessFrom = (manager: Manager) => RegExp(`${manager}\.${identifier}`);
 const destructuringFrom = (manager: Manager) => new RegExp(`((let)|(const)|(var))\\s*\\{([\\w\\s,])*\\}\\s*=\\s*(${manager})`, "g");
@@ -31,11 +30,11 @@ export function variablesDestructuredFrom(manager: Manager, editor: vscode.TextE
 }
 
 /**
- * Return a RegExp or-ing the strings in strs.
+ * Return a RegExp or-ing the strings in strs, appending legal next tokens (like `foo.` or `foo;`).
  * Example: ["foo", "bar"] => /foo|bar/g
  */
 function concatOrRegex(strs: Iterable<string>): RegExp {
-    const re = Array.from(strs).map(s => `${s}(\\:|\\.|\\,|\\s|\\[|\\{|\\;|\\(){1}`).join("|");
+    const re = Array.from(strs).map(s => `${s}.{1}`).join("|");
     return new RegExp(re, "g");
 }
 
