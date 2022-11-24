@@ -31,7 +31,7 @@ export function variablesDestructuredFrom(manager: Manager, editor: vscode.TextE
  * Example: ["foo", "bar"] => /foo|bar/g
  */
 function concatOrRegex(strs: Iterable<string>): RegExp {
-    const re = Array.from(strs).map(s => `${s}(.|\\n){1}`).join("|");
+    const re = Array.from(strs).map(s => `${s}(\\W|\\n){1}`).join("|"); // NOTE: This does not match an identifier followed by nothing. This can happen if the identifier is the last token in the file, but that case is farily unlikely in real world usage.
     return new RegExp(re, "g");
 }
 

@@ -5,6 +5,7 @@ import { Manager, DecorationTypeManager } from "./shared-types";
 
 interface State {
     active: boolean;
+    enabled: boolean;
     editor?: vscode.TextEditor;
     context?: vscode.ExtensionContext;
     decorationTypeManager: DecorationTypeManager;
@@ -13,7 +14,7 @@ interface State {
 
 let state: State = Object.freeze({
     active: false,
-    colorTheme: vscode.window.activeColorTheme.kind,
+    enabled: true,
     decorationTypeManager: decorate.makeDecorationTypeManager(),
     statusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100),
 });
@@ -45,7 +46,8 @@ function updateHighlight(): void {
 }
 
 function triggerUpdateHighlight(): void {
-    if (state.active) updateHighlight();
+    const { enabled, active } = state;
+    if (enabled && active) updateHighlight();
 }
 
 function disableHighlights(): void {
@@ -54,7 +56,17 @@ function disableHighlights(): void {
 }
 
 function enableHighlights(): void {
-    if (!state.active) updateState({ active: true, decorationTypeManager: decorate.makeDecorationTypeManager() });
+    const { enabled, active } = state;
+
+    if (!enabled) {
+        showNotSupportedError();
+        return;
+    }
+
+    if (!active) {
+        updateState({ active: true, decorationTypeManager: decorate.makeDecorationTypeManager() });
+    }
+
     updateHighlight();
 }
 
@@ -64,8 +76,24 @@ function updateStatusBarItem(): void {
     statusBarItem.show();
 }
 
+function supportedLangauge(): boolean {
+    const { editor } = state;
+    const allowedLangauges = new Set(["javascript", "javascriptreact", "typescript", "typescriptreact"]);
+    const activeLangauge = editor?.document.languageId ?? "";
+    return allowedLangauges.has(activeLangauge);
+}
+
+function showNotSupportedError(): void {
+    vscode.window.showErrorMessage(`${state.editor?.document.languageId} is not supported by ixfx highlight.`);
+}
+
 export function activate(context: vscode.ExtensionContext) {
     updateState({ context: context, editor: vscode.window.activeTextEditor });
+
+    if (!supportedLangauge()) {
+        showNotSupportedError();
+        updateState({ enabled: false });
+    }
 
     { // Status bar item
         state.statusBarItem.command = "ixfx-highlight.toggle";
