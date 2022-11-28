@@ -2,6 +2,10 @@
   "name": "ixfx-highlight",
   "displayName": "ixfx-highlight",
   "description": "Prefer flashlights over christmas trees.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/motform/ixfx-highlight"
+  },
   "version": "1.0.0",
   "engines": {
     "vscode": "^1.73.0"
