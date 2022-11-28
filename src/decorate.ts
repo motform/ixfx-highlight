@@ -59,8 +59,7 @@ function decorationTypeFor(identiferType: IdentiferType, manager: Manager): vsco
 }
 
 export function identifiersIn(ranges: vscode.Range[], decorationType: vscode.TextEditorDecorationType, manager: Manager, editor: vscode.TextEditor): void {
-    const decorations: vscode.DecorationOptions[] = [];
-    ranges.forEach(range => decorations.push({ range: range, hoverMessage: `Originates from ${manager}.` }));
+    const decorations = ranges.map(range => ({ range: range, hoverMessage: `Originates from ${manager}.` }));
     editor.setDecorations(decorationType, decorations);
 }
 
