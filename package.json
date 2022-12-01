@@ -2,6 +2,8 @@
   "name": "ixfx-highlight",
   "displayName": "ixfx-highlight",
   "description": "Prefer flashlights over christmas trees.",
+  "license": "MIT",
+  "publisher": "motform",
   "repository": {
     "type": "git",
     "url": "https://github.com/motform/ixfx-highlight"
@@ -14,8 +16,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:ixfx-highlight.enable",
-    "onCommand:ixfx-highlight.toggle"
+    "*"
   ],
   "main": "./out/extension.js",
   "contributes": {
