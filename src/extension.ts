@@ -76,6 +76,11 @@ function updateStatusBarItem(): void {
     statusBarItem.show();
 }
 
+function hideStatusBarItem(): void {
+    const { statusBarItem } = state;
+    statusBarItem.hide();
+}
+
 function supportedLangauge(): boolean {
     const { editor } = state;
     const allowedLangauges = new Set(["javascript", "javascriptreact", "typescript", "typescriptreact"]);
@@ -88,23 +93,18 @@ function showNotSupportedError(): void {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    // TODO: Move the activation code out of... activate, since we activate on start to get the icon
+    // We update the state first so that functions that run during setup that rely on the state
+    // get an up-to-date view of the the world.
     updateState({ context: context, editor: vscode.window.activeTextEditor });
 
-    // TODO
-    // if (!supportedLangauge()) {
-    //     showNotSupportedError();
-    //     updateState({ enabled: false });
-    // }
 
-    { // Status bar item
-        state.statusBarItem.command = "ixfx-highlight.toggle";
-        context.subscriptions.push(state.statusBarItem);
-        updateStatusBarItem();
+    { // Create the status bar item.
+        const { statusBarItem } = state;
+
+        statusBarItem.command = "ixfx-highlight.toggle";
+        context.subscriptions.push(statusBarItem);
+        supportedLangauge() ? updateStatusBarItem() : hideStatusBarItem();
     }
-
-
-    const editors: Array<vscode.TextEditor | undefined> = [];
 
     vscode.window.onDidChangeActiveTextEditor(editor => {
         updateState({ editor: editor });
@@ -116,9 +116,10 @@ export function activate(context: vscode.ExtensionContext) {
         } else {
             disableHighlights();
             updateStatusBarItem();
+            hideStatusBarItem();
         }
-    }, null, context.subscriptions);
 
+    }, null, context.subscriptions);
 
     vscode.window.onDidChangeActiveColorTheme(() => {
         updateState({ decorationTypeManager: decorate.makeDecorationTypeManager() });
@@ -126,7 +127,9 @@ export function activate(context: vscode.ExtensionContext) {
     }, null, context.subscriptions);
 
     vscode.workspace.onDidChangeTextDocument(event => {
-        if (state.editor && event.document === state.editor.document) {
+        const { editor } = state;
+
+        if (editor && event.document === editor.document) {
             triggerUpdateHighlight();
         }
     }, null, context.subscriptions);
@@ -134,6 +137,11 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
 
         vscode.commands.registerCommand("ixfx-highlight.enable", () => {
+            if (!supportedLangauge()) {
+                showNotSupportedError();
+                return;
+            }
+
             enableHighlights();
             updateStatusBarItem();
         }),
@@ -144,6 +152,11 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         vscode.commands.registerCommand("ixfx-highlight.toggle", () => {
+            if (!supportedLangauge()) {
+                showNotSupportedError();
+                return;
+            }
+
             state.active ? disableHighlights() : enableHighlights();
             updateStatusBarItem();
         }),

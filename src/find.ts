@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Manager } from "./shared-types";
 
-export const state = ["state", "useState", "updateState"];
+export const state = ["state", "useState", "updateState", "drawState"]; // TODO make this into a regex instaed
 export const settings = ["settings", "useSettings", "updateSettings"];
 
 const identifier = /[a-zA-Z]([a-zA-Z]|\d)*/g;
