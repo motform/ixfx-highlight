@@ -16,7 +16,7 @@ let state: State = Object.freeze({
     active: false,
     enabled: true,
     decorationTypeManager: decorate.makeDecorationTypeManager(),
-    statusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100),
+    statusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 25),
 });
 
 function updateState(newState: Partial<State>): void {
@@ -88,12 +88,14 @@ function showNotSupportedError(): void {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+    // TODO: Move the activation code out of... activate, since we activate on start to get the icon
     updateState({ context: context, editor: vscode.window.activeTextEditor });
 
-    if (!supportedLangauge()) {
-        showNotSupportedError();
-        updateState({ enabled: false });
-    }
+    // TODO
+    // if (!supportedLangauge()) {
+    //     showNotSupportedError();
+    //     updateState({ enabled: false });
+    // }
 
     { // Status bar item
         state.statusBarItem.command = "ixfx-highlight.toggle";
@@ -101,10 +103,22 @@ export function activate(context: vscode.ExtensionContext) {
         updateStatusBarItem();
     }
 
+
+    const editors: Array<vscode.TextEditor | undefined> = [];
+
     vscode.window.onDidChangeActiveTextEditor(editor => {
-        if (editor) updateState({ editor: editor });
-        triggerUpdateHighlight();
+        updateState({ editor: editor });
+
+        if (editor && supportedLangauge()) {
+            enableHighlights();
+            updateStatusBarItem();
+            triggerUpdateHighlight();
+        } else {
+            disableHighlights();
+            updateStatusBarItem();
+        }
     }, null, context.subscriptions);
+
 
     vscode.window.onDidChangeActiveColorTheme(() => {
         updateState({ decorationTypeManager: decorate.makeDecorationTypeManager() });
