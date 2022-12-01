@@ -17,6 +17,14 @@ let state: State = Object.freeze({
     statusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 25),
 });
 
+interface Settings {
+    allowedLangauges: Set<string>;
+}
+
+const settings: Settings = {
+    allowedLangauges: new Set(["javascript", "javascriptreact", "typescript", "typescriptreact"]),
+}
+
 function updateState(newState: Partial<State>): void {
     state = Object.freeze({ ...state, ...newState });
 }
@@ -76,9 +84,8 @@ function hideStatusBarItem(): void {
 
 function supportedLangauge(): boolean {
     const { editor } = state;
-    const allowedLangauges = new Set(["javascript", "javascriptreact", "typescript", "typescriptreact"]);
-    const activeLangauge = editor?.document.languageId ?? "";
-    return allowedLangauges.has(activeLangauge);
+    const { allowedLangauges } = settings;
+    return allowedLangauges.has(editor?.document.languageId ?? "");
 }
 
 function showNotSupportedError(): void {
@@ -109,13 +116,12 @@ export function activate(context: vscode.ExtensionContext) {
                 updateHighlight();
             }
 
-            updateStatusBarItem(); // not sure we have to do this
+            updateStatusBarItem();
             showStatusBarItem();
         } else {
             decorate.remove(decorationTypeManager);
             hideStatusBarItem();
         }
-
     }, null, context.subscriptions);
 
     vscode.window.onDidChangeActiveColorTheme(() => {
