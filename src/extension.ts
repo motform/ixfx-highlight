@@ -4,7 +4,6 @@ import * as decorate from "./decorate";
 import { Manager, DecorationTypeManager } from "./shared-types";
 
 interface State {
-    active: boolean;
     enabled: boolean;
     editor?: vscode.TextEditor;
     context?: vscode.ExtensionContext;
@@ -13,8 +12,7 @@ interface State {
 }
 
 let state: State = Object.freeze({
-    active: false,
-    enabled: true,
+    enabled: false,
     decorationTypeManager: decorate.makeDecorationTypeManager(),
     statusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 25),
 });
@@ -45,34 +43,29 @@ function updateHighlight(): void {
     }
 }
 
-function triggerUpdateHighlight(): void {
-    const { enabled, active } = state;
-    if (enabled && active) updateHighlight();
+function enableHighlights(): void {
+    const { enabled } = state;
+
+    if (enabled) return;
+
+    updateState({ enabled: true, decorationTypeManager: decorate.makeDecorationTypeManager() });
+    updateHighlight();
+    updateStatusBarItem();
 }
 
 function disableHighlights(): void {
+    updateState({ enabled: false });
     decorate.remove(state.decorationTypeManager);
-    updateState({ active: false });
-}
-
-function enableHighlights(): void {
-    const { enabled, active } = state;
-
-    if (!enabled) {
-        showNotSupportedError();
-        return;
-    }
-
-    if (!active) {
-        updateState({ active: true, decorationTypeManager: decorate.makeDecorationTypeManager() });
-    }
-
-    updateHighlight();
+    updateStatusBarItem();
 }
 
 function updateStatusBarItem(): void {
+    const { statusBarItem, enabled } = state;
+    statusBarItem.text = enabled ? `$(eye-closed) ixfx` : `$(eye) ixfx`;
+}
+
+function showStatusBarItem(): void {
     const { statusBarItem } = state;
-    statusBarItem.text = (state.active) ? `$(eye-closed) ixfx` : `$(eye) ixfx`;
     statusBarItem.show();
 }
 
@@ -93,78 +86,81 @@ function showNotSupportedError(): void {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    // We update the state first so that functions that run during setup that rely on the state
-    // get an up-to-date view of the the world.
+    // We update the state first so that functions that run during setup 
+    // that rely on the state get an up-to-date view of the the world.
     updateState({ context: context, editor: vscode.window.activeTextEditor });
-
 
     { // Create the status bar item.
         const { statusBarItem } = state;
 
         statusBarItem.command = "ixfx-highlight.toggle";
         context.subscriptions.push(statusBarItem);
-        supportedLangauge() ? updateStatusBarItem() : hideStatusBarItem();
+        updateStatusBarItem();
+        supportedLangauge() ? showStatusBarItem() : hideStatusBarItem();
     }
 
     vscode.window.onDidChangeActiveTextEditor(editor => {
         updateState({ editor: editor });
+        const { enabled, decorationTypeManager } = state;
 
         if (editor && supportedLangauge()) {
-            enableHighlights();
-            updateStatusBarItem();
-            triggerUpdateHighlight();
+            if (enabled) {
+                updateState({ decorationTypeManager: decorate.makeDecorationTypeManager() });
+                updateHighlight();
+            }
+
+            updateStatusBarItem(); // not sure we have to do this
+            showStatusBarItem();
         } else {
-            disableHighlights();
-            updateStatusBarItem();
+            decorate.remove(decorationTypeManager);
             hideStatusBarItem();
         }
 
     }, null, context.subscriptions);
 
     vscode.window.onDidChangeActiveColorTheme(() => {
-        updateState({ decorationTypeManager: decorate.makeDecorationTypeManager() });
-        triggerUpdateHighlight();
+        const { enabled, decorationTypeManager } = state;
+
+        if (enabled && supportedLangauge()) {
+            // We need to make a new decorationTypeManager to get the dark-mode colors
+            decorate.remove(decorationTypeManager);
+            updateState({ decorationTypeManager: decorate.makeDecorationTypeManager() });
+            updateHighlight();
+        }
     }, null, context.subscriptions);
 
     vscode.workspace.onDidChangeTextDocument(event => {
-        const { editor } = state;
+        const { editor, enabled } = state;
 
-        if (editor && event.document === editor.document) {
-            triggerUpdateHighlight();
+        if (editor && enabled && event.document === editor.document) {
+            updateHighlight();
         }
     }, null, context.subscriptions);
 
     context.subscriptions.push(
 
         vscode.commands.registerCommand("ixfx-highlight.enable", () => {
-            if (!supportedLangauge()) {
-                showNotSupportedError();
-                return;
-            }
-
-            enableHighlights();
-            updateStatusBarItem();
+            supportedLangauge() ? enableHighlights() : showNotSupportedError();
         }),
 
         vscode.commands.registerCommand("ixfx-highlight.disable", () => {
             disableHighlights();
-            updateStatusBarItem();
         }),
 
         vscode.commands.registerCommand("ixfx-highlight.toggle", () => {
-            if (!supportedLangauge()) {
+            if (supportedLangauge()) {
+                state.enabled ? disableHighlights() : enableHighlights();
+            } else {
                 showNotSupportedError();
-                return;
             }
-
-            state.active ? disableHighlights() : enableHighlights();
-            updateStatusBarItem();
         }),
     );
 }
 
 export function deactivate(): void {
-    const { statusBarItem, decorationTypeManager } = state;
+    const { decorationTypeManager } = state;
     decorate.remove(decorationTypeManager);
-    statusBarItem.hide();
+    hideStatusBarItem();
 }
+
+// We are probably not making a decoration type manager for when we re-enable in an editor
