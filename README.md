@@ -4,7 +4,7 @@ Code syntax highlighting is traditionally limited to the current programming lan
 
 _ixfx Highlight_ is a prototype investigating a novel approach to _context-aware syntax highlighting._ It assumes that your code employs the conventions of [ClintH/ixfx](https://github.com/ClintH/ixfx), a functional framework for sketching and prototyping interactivity. ixfx uses a pattern of [`state` and `settings` objects](https://github.com/ClintH/ixfx-demos/blob/main/CODE-STYLE.md#settings), explicating stateful and configuration variables. The prototype highlights these objects and instances where they are used in code using a predictable background color.
 
-![A screenshot of ixfx Highlight running in VS Code with a light theme.](/resources/screenshot_light.png)
+![A screenshot of ixfx Highlight running in VS Code with a light theme.](resources/screenshot_light.png)
 
 The extension makes it possible to engage with the code on another conceptual level by explicating a context-aware understanding of the program level state.
 
@@ -14,11 +14,13 @@ The current iteration of _ixfx Highlight_ uses simple regular expressions to fin
 
 _ixfx Highlight_ is primarily an aid to students learning how to prototype interactivity using ixfx. It is oddly specific and will likely not have practical non-ixfx-users. However, I hope it might provoke some thoughts or ideas. Feel free to [reach out](www.motform.org) if you also find the notion of a context-aware text editor.
 
+**[Download _ixfx Highlight_ on the VS Code Marketplace.](https://marketplace.visualstudio.com/items?itemName=motform.ixfx-highlight)**
+
 ## Features
 
 _ixfx Highlight_ follows [ixfx convention](https://github.com/ClintH/ixfx-demos/blob/main/CODE-STYLE.md) and highlights instances of variable called `state` and `settings`, along with any destructured properties. You can turn the highlights on or off using the status bar icon in the bottom right.
 
-![A screenshot of ixfx Highlight running in VS Code with a light theme.](/resources/screenshot_dark.png)
+![A screenshot of ixfx Highlight running in VS Code with a light theme.](resources/screenshot_dark.png)
 
 I recommend pairing _ixfx Highlight_ with a restrained color theme, as busier ones might overpower the relatively subtle backgrounds. The screenshots use Niki Tonsky's [Alabaster](https://marketplace.visualstudio.com/items?itemName=tonsky.theme-alabaster) and Mike Hodgson's [Monochorme Dark](https://marketplace.visualstudio.com/items?itemName=mikehhodgson.monochrome-dark).
 
@@ -43,5 +45,3 @@ The current prototype has a few limitations, none of which should be disruptive.
 ### 1.0.X
 
 Initial release, with minor patches. Covers the basic usecase.
-
-[semantic highlighting](https://code.visualstudio.com/api/language-extensions/semantic-highlight-guide)
