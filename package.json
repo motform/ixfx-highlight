@@ -1,6 +1,6 @@
 {
   "name": "ixfx-highlight",
-  "displayName": "ixfx highlight",
+  "displayName": "ixfx Highlight",
   "description": "Context aware syntax highlighting for ixfx.",
   "license": "MIT",
   "publisher": "motform",
@@ -23,7 +23,7 @@
     "prototype"
   ],
   "galleryBanner": {
-    "color": "#F6E1DB",
+    "color": "#ECEFF5",
     "theme": "light"
   },
   "activationEvents": [
