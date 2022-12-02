@@ -1,9 +1,10 @@
 {
   "name": "ixfx-highlight",
-  "displayName": "ixfx-highlight",
-  "description": "Prefer flashlights over christmas trees.",
+  "displayName": "ixfx highlight",
+  "description": "Context aware syntax highlighting for ixfx.",
   "license": "MIT",
   "publisher": "motform",
+  "icon": "resources/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/motform/ixfx-highlight"
@@ -15,6 +16,16 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "syntax highlight",
+    "ixfx",
+    "interactivity",
+    "prototype"
+  ],
+  "galleryBanner": {
+    "color": "#F6E1DB",
+    "theme": "light"
+  },
   "activationEvents": [
     "onStartupFinished"
   ],
