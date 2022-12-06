@@ -1,29 +1,6 @@
 import * as vscode from "vscode";
 import { Manager, DecorationConfiguration, DecorationTypeManager, Color } from "./shared-types";
 
-type IdentiferType = "variable" | "manager";
-
-interface ColorSet {
-    light: Color;
-    dark: Color;
-}
-
-interface DefaultColors {
-    state: ColorSet;
-    settings: ColorSet
-}
-
-const defaultColors: DefaultColors = {
-    state: {
-        light: "#FF5733",
-        dark: "#FF8166",
-    },
-    settings: {
-        light: "#3498DB",
-        dark: "#5FAEE3",
-    },
-};
-
 /**
  * Return a hexadecimal CSS color with opacity appended.
  * It really does very little.
@@ -36,7 +13,7 @@ function hexColorWithOpacity(hexColor: Color, opacity: number): Color {
 /**
  * Return decoration appropriate for manager and type.
  */
-function decorationTypeFor(identiferType: IdentiferType, manager: Manager, decorationConfiguration: DecorationConfiguration): vscode.TextEditorDecorationType {
+function decorationTypeFor(identiferType: "variable" | "manager", manager: Manager, decorationConfiguration: DecorationConfiguration): vscode.TextEditorDecorationType {
     const baseColor = decorationConfiguration[manager];
     const isVariable = identiferType === "variable";
 
@@ -99,6 +76,11 @@ export function remove(decorationTypeManager: DecorationTypeManager): void {
     decorationTypeManager.state.manager.dispose();
     decorationTypeManager.state.variable.dispose();
 }
+
+
+
+
+
 
 function gray(): vscode.TextEditorDecorationType {
     return vscode.window.createTextEditorDecorationType({
