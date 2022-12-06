@@ -32,12 +32,20 @@ function hexColorWithOpacity(hexColor: Color, opacity: number): Color {
     return `${hexColor}${opacity.toString()}`;
 }
 
+
 /**
  * Return decoration appropriate for manager and type.
  */
 function decorationTypeFor(identiferType: IdentiferType, manager: Manager, decorationConfiguration: DecorationConfiguration): vscode.TextEditorDecorationType {
-    const opacity = (identiferType === "variable") ? [10, 11] : [25, 26]; // TODO Make a bit more... robust.
     const baseColor = decorationConfiguration[manager];
+    const isVariable = identiferType === "variable";
+
+    let opacity: [number, number];
+    switch (decorationConfiguration.prominence) {
+        case "Low": opacity = isVariable ? [10, 11] : [30, 31]; break;
+        case "Medium": opacity = isVariable ? [20, 21] : [40, 41]; break;
+        case "High": opacity = isVariable ? [30, 31] : [60, 61]; break;
+    }
 
     return vscode.window.createTextEditorDecorationType({
         borderWidth: "1px",

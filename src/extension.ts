@@ -112,6 +112,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.workspace.onDidChangeConfiguration(event => {
         if (event.affectsConfiguration("ixfx-highlight.color")) {
+            // Input validation for this is done inside of the configuration.
+            // This might mean that we can run of an incorrect hex color,
+            // but I think that is OK in this limited prototype.
             const decorationConfiguration = vscode.workspace.getConfiguration("ixfx-highlight").get("color") as DecorationConfiguration;
 
             updateState({

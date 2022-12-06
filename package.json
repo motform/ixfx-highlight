@@ -49,22 +49,30 @@
         "ixfx-highlight.color.state.light": {
           "type": "string",
           "default": "#FF5733",
-          "markdownDescription": "The color used to highlight `state` in light color themes.\n\rSpecified in CSS hex notation."
+          "pattern": "^#([0-9a-fA-F]{2}){3}$",
+          "patternErrorMessage": "Not a valid 6 digit hex color.",
+          "markdownDescription": "The color used to highlight `state` in light color themes.\n\rSpecified in full length CSS hex notation (`#RRBBGG`)."
         },
         "ixfx-highlight.color.state.dark": {
           "type": "string",
           "default": "#FF8166",
-          "markdownDescription": "The color used to highlight `state` in dark color themes.\n\rSpecified in CSS hex notation."
+          "pattern": "^#([0-9a-fA-F]{2}){3}$",
+          "patternErrorMessage": "Not a valid 6 digit hex color.",
+          "markdownDescription": "The color used to highlight `state` in dark color themes.\n\rSpecified in full length CSS hex notation (`#RRBBGG`)."
         },
         "ixfx-highlight.color.settings.light": {
           "type": "string",
           "default": "#3498DB",
-          "markdownDescription": "The color used to highlight `settings` in light color themes.\n\rSpecified in CSS hex notation."
+          "pattern": "^#([0-9a-fA-F]{2}){3}$",
+          "patternErrorMessage": "Not a valid 6 digit hex color.",
+          "markdownDescription": "The color used to highlight `settings` in light color themes.\n\rSpecified in full length CSS hex notation (`#RRBBGG`)."
         },
         "ixfx-highlight.color.settings.dark": {
           "type": "string",
           "default": "#5FAEE3",
-          "markdownDescription": "The color used to highlight `settings` in dark color themes.\n\rSpecified in CSS hex notation."
+          "pattern": "^#([0-9a-fA-F]{2}){3}$",
+          "patternErrorMessage": "Not a valid 6 digit hex color.",
+          "markdownDescription": "The color used to highlight `settings` in dark color themes.\n\rSpecified in full length CSS hex notation (`#RRBBGG`)"
         },
         "ixfx-highlight.color.prominence": {
           "type": "string",
