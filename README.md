@@ -29,8 +29,17 @@ The extension is limited to JavaScript or TypeScript files.
 
 ## Extension Settings
 You can change the base colors to highlight `state` and `settings`. Note that these will dim by lowering the opacity, so you will want to pick something solid and vibrant.
-- `ixfx-highlight.settings-color`: The base color used for settings.
-- `ixfx-highlight.state-color`: The base color used for state.
+
+- `ixfx-highlight.color.settings.dark`: The settings color used in dark color themes, a 6 digit hex color.
+- `ixfx-highlight.color.settings.light`: The settings color used in dark color themes, a 6 digit hex color.
+- `ixfx-highlight.color.state.dark`: The state color used in dark color themes, a 6 digit hex color.
+- `ixfx-highlight.color.state.light`: The state color used in light color themes, a 6 digit hex color.
+
+You can also control the prominence (opacity) of highlights.
+
+- `ixfx-highlight.color.prominence`: `"Low"` | `"Medium"` | `"High"`
+
+All of the settings are configurable in the GUI as well.
 
 ## Known Issues
 
@@ -39,9 +48,13 @@ The current prototype has a few limitations, none of which should be disruptive.
 - Currently only highlights destructured properties. That is, in part, a good thing since it inadvertently highlights ignored properties. Remember, in every bug there lives a latent feature.
 - Kind of iffy with nested objects.
 - Does not consider your color theme; see above for recommendations.
-- Only highlights the active file (the active editor, in VS Code parlance), which becomes an issue when you split the view. It won't highlight an inactive but visible file, which stems from the fact that we only handle the active editor. It is not the biggest issue, but fixing it would require cross-editor state management, which is a potentially annoying thing to do in the VS Code API.
+- Only highlights the active file (the active editor, in VS Code parlance). This becomes an issue when you split the view; it won't highlight an inactive but visible file, which stems from the fact that we only handle the active editor. It is not the biggest problem, but fixing it would require cross-editor state management, which is a potentially annoying thing to do in the VS Code API.
 
 ## Release Notes
+
+### 1.1.X
+
+Add configuration of highlight colors and prominence.
 
 ### 1.0.X
 
