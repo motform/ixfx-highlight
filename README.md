@@ -8,13 +8,14 @@ _ixfx Highlight_ is a prototype investigating a novel approach to _context-aware
 
 The extension makes it possible to engage with the code on another conceptual level by explicating a context-aware understanding of the program level state.
 
+
+**[Download _ixfx Highlight_ on the VS Code Marketplace.](https://marketplace.visualstudio.com/items?itemName=motform.ixfx-highlight)**
+
 ---
 
 The current iteration of _ixfx Highlight_ uses simple regular expressions to find the related variable names. As such, it is easy to run into edge cases that the regex can't handle. Sadly, VS Code does not expose a public API to hook into whatever process is responsible for the syntax highlighting for the particular file. As such, we are stuck with regex in lieu of a separate parser, like  [tree-sitter](https://tree-sitter.github.io/tree-sitter/).
 
 _ixfx Highlight_ is primarily an aid to students learning how to prototype interactivity using ixfx. It is oddly specific and will likely not have practical non-ixfx-users. However, I hope it might provoke some thoughts or ideas. Feel free to [reach out](www.motform.org) if you also find the notion of a context-aware text editor.
-
-**[Download _ixfx Highlight_ on the VS Code Marketplace.](https://marketplace.visualstudio.com/items?itemName=motform.ixfx-highlight)**
 
 ## Features
 

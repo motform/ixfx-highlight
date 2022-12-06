@@ -55,3 +55,4 @@ export function rangesMatching(identifiers: Set<string>, editor: vscode.TextEdit
 
     return ranges;
 }
+

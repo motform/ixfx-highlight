@@ -42,7 +42,47 @@
         "command": "ixfx-highlight.toggle",
         "title": "ixfx: Toggle highlights"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "ixfx highlight",
+      "properties": {
+        "ixfx-highlight.color.state.light": {
+          "type": "string",
+          "default": "#FF5733",
+          "markdownDescription": "The color used to highlight `state` in light color themes.\n\rSpecified in CSS hex notation."
+        },
+        "ixfx-highlight.color.state.dark": {
+          "type": "string",
+          "default": "#FF8166",
+          "markdownDescription": "The color used to highlight `state` in dark color themes.\n\rSpecified in CSS hex notation."
+        },
+        "ixfx-highlight.color.settings.light": {
+          "type": "string",
+          "default": "#3498DB",
+          "markdownDescription": "The color used to highlight `settings` in light color themes.\n\rSpecified in CSS hex notation."
+        },
+        "ixfx-highlight.color.settings.dark": {
+          "type": "string",
+          "default": "#5FAEE3",
+          "markdownDescription": "The color used to highlight `settings` in dark color themes.\n\rSpecified in CSS hex notation."
+        },
+        "ixfx-highlight.color.prominence": {
+          "type": "string",
+          "default": "Low",
+          "enum": [
+            "Low",
+            "Medium",
+            "High"
+          ],
+          "enumDescriptions": [
+            "The highlights will be faint, typically weaker than other syntax highlighting.",
+            "The highlights will be at the level of most syntax highlighting.",
+            "The highlights be very powerful, more prominent thant most syntax highlighting."
+          ],
+          "markdownDescription": "Specifiec how prominent the highlights are."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

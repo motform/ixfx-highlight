@@ -1,7 +1,5 @@
 import * as vscode from "vscode";
-import { Manager, DecorationTypeManager } from "./shared-types";
-
-type Color = `#${string}`;
+import { Manager, DecorationConfiguration, DecorationTypeManager, Color } from "./shared-types";
 
 type IdentiferType = "variable" | "manager";
 
@@ -37,9 +35,9 @@ function hexColorWithOpacity(hexColor: Color, opacity: number): Color {
 /**
  * Return decoration appropriate for manager and type.
  */
-function decorationTypeFor(identiferType: IdentiferType, manager: Manager): vscode.TextEditorDecorationType {
+function decorationTypeFor(identiferType: IdentiferType, manager: Manager, decorationConfiguration: DecorationConfiguration): vscode.TextEditorDecorationType {
     const opacity = (identiferType === "variable") ? [10, 11] : [25, 26]; // TODO Make a bit more... robust.
-    const baseColor = defaultColors[manager];
+    const baseColor = decorationConfiguration[manager];
 
     return vscode.window.createTextEditorDecorationType({
         borderWidth: "1px",
@@ -65,15 +63,18 @@ export function identifiersIn(ranges: vscode.Range[], decorationType: vscode.Tex
     editor.setDecorations(decorationType, decorations);
 }
 
-export function makeDecorationTypeManager(): DecorationTypeManager {
+/**
+ * Never before have I come so close to writing Enterprise Java.
+ */
+export function makeDecorationTypeManagerWith(decorationConfiguration: DecorationConfiguration): DecorationTypeManager {
     return {
         settings: {
-            manager: decorationTypeFor("manager", "settings"),
-            variable: decorationTypeFor("variable", "settings"),
+            manager: decorationTypeFor("manager", "settings", decorationConfiguration),
+            variable: decorationTypeFor("variable", "settings", decorationConfiguration),
         },
         state: {
-            manager: decorationTypeFor("manager", "state"),
-            variable: decorationTypeFor("variable", "state"),
+            manager: decorationTypeFor("manager", "state", decorationConfiguration),
+            variable: decorationTypeFor("variable", "state", decorationConfiguration),
         },
     };
 }

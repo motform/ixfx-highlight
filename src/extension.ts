@@ -1,29 +1,31 @@
 import * as vscode from "vscode";
 import * as find from "./find";
 import * as decorate from "./decorate";
-import { Manager, DecorationTypeManager } from "./shared-types";
+import { Manager, DecorationTypeManager, DecorationConfiguration } from "./shared-types";
 
 interface State {
     enabled: boolean;
     editor?: vscode.TextEditor;
     context?: vscode.ExtensionContext;
+    decorationConfiguration: DecorationConfiguration;
     decorationTypeManager: DecorationTypeManager;
     statusBarItem: vscode.StatusBarItem;
 }
 
 let state: State = Object.freeze({
     enabled: false,
-    decorationTypeManager: decorate.makeDecorationTypeManager(),
+    decorationTypeManager: decorate.makeDecorationTypeManagerWith(vscode.workspace.getConfiguration("ixfx-highlight").get("color") as DecorationConfiguration), // TODO: This is a bit hacky/ugly and should probably be done in activate()
     statusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 25),
+    decorationConfiguration: vscode.workspace.getConfiguration("ixfx-highlight").get("color") as DecorationConfiguration, // This means we are dealing with a proxy object, which I'm not all to familiar with, but I'm sure there is some quirk somewhere that I'm blissfully (?) unaware off.
 });
 
 interface Settings {
     allowedLangauges: Set<string>;
 }
 
-const settings: Settings = {
+const settings: Readonly<Settings> = {
     allowedLangauges: new Set(["javascript", "javascriptreact", "typescript", "typescriptreact"]),
-}
+};
 
 function updateState(newState: Partial<State>): void {
     state = Object.freeze({ ...state, ...newState });
@@ -52,11 +54,11 @@ function updateHighlight(): void {
 }
 
 function enableHighlights(): void {
-    const { enabled } = state;
+    const { enabled, decorationConfiguration } = state;
 
     if (enabled) return;
 
-    updateState({ enabled: true, decorationTypeManager: decorate.makeDecorationTypeManager() });
+    updateState({ enabled: true, decorationTypeManager: decorate.makeDecorationTypeManagerWith(decorationConfiguration) });
     updateHighlight();
     updateStatusBarItem();
 }
@@ -97,6 +99,7 @@ export function activate(context: vscode.ExtensionContext) {
     // that rely on the state get an up-to-date view of the the world.
     updateState({ context: context, editor: vscode.window.activeTextEditor });
 
+
     { // Create the status bar item.
         const { statusBarItem } = state;
 
@@ -106,13 +109,26 @@ export function activate(context: vscode.ExtensionContext) {
         supportedLangauge() ? showStatusBarItem() : hideStatusBarItem();
     }
 
+
+    vscode.workspace.onDidChangeConfiguration(event => {
+        if (event.affectsConfiguration("ixfx-highlight.color")) {
+            const decorationConfiguration = vscode.workspace.getConfiguration("ixfx-highlight").get("color") as DecorationConfiguration;
+
+            updateState({
+                decorationConfiguration,
+                decorationTypeManager: decorate.makeDecorationTypeManagerWith(decorationConfiguration),
+            });
+        }
+    }, null, context.subscriptions);
+
+
     vscode.window.onDidChangeActiveTextEditor(editor => {
         updateState({ editor: editor });
-        const { enabled, decorationTypeManager } = state;
+        const { enabled, decorationConfiguration, decorationTypeManager } = state;
 
         if (editor && supportedLangauge()) {
             if (enabled) {
-                updateState({ decorationTypeManager: decorate.makeDecorationTypeManager() });
+                updateState({ decorationTypeManager: decorate.makeDecorationTypeManagerWith(decorationConfiguration) });
                 updateHighlight();
             }
 
@@ -125,15 +141,16 @@ export function activate(context: vscode.ExtensionContext) {
     }, null, context.subscriptions);
 
     vscode.window.onDidChangeActiveColorTheme(() => {
-        const { enabled, decorationTypeManager } = state;
+        const { enabled, decorationConfiguration, decorationTypeManager } = state;
 
         if (enabled && supportedLangauge()) {
             // We need to make a new decorationTypeManager to get the dark-mode colors
             decorate.remove(decorationTypeManager);
-            updateState({ decorationTypeManager: decorate.makeDecorationTypeManager() });
+            updateState({ decorationTypeManager: decorate.makeDecorationTypeManagerWith(decorationConfiguration) });
             updateHighlight();
         }
     }, null, context.subscriptions);
+
 
     vscode.workspace.onDidChangeTextDocument(event => {
         const { editor, enabled } = state;
@@ -142,6 +159,7 @@ export function activate(context: vscode.ExtensionContext) {
             updateHighlight();
         }
     }, null, context.subscriptions);
+
 
     context.subscriptions.push(
 
@@ -168,5 +186,3 @@ export function deactivate(): void {
     decorate.remove(decorationTypeManager);
     hideStatusBarItem();
 }
-
-// We are probably not making a decoration type manager for when we re-enable in an editor
