@@ -13,15 +13,18 @@ function hexColorWithOpacity(hexColor: Color, opacity: number): Color {
 /**
  * Return decoration appropriate for manager and type.
  */
-function decorationTypeFor(identiferType: "variable" | "manager", manager: Manager, decorationConfiguration: DecorationConfiguration): vscode.TextEditorDecorationType {
+function makeDecorationType(identiferType: "variable" | "manager", manager: Manager, decorationConfiguration: DecorationConfiguration): vscode.TextEditorDecorationType {
     const baseColor = decorationConfiguration[manager];
     const isVariable = identiferType === "variable";
 
     let opacity: [number, number];
     switch (decorationConfiguration.prominence) {
-        case "Low": opacity = isVariable ? [10, 11] : [30, 31]; break;
-        case "Medium": opacity = isVariable ? [20, 21] : [40, 41]; break;
-        case "High": opacity = isVariable ? [30, 31] : [60, 61]; break;
+        case "Low":
+            opacity = isVariable ? [10, 11] : [30, 31]; break;
+        case "Medium":
+            opacity = isVariable ? [20, 21] : [40, 41]; break;
+        case "High":
+            opacity = isVariable ? [30, 31] : [60, 61]; break;
     }
 
     return vscode.window.createTextEditorDecorationType({
@@ -30,64 +33,62 @@ function decorationTypeFor(identiferType: "variable" | "manager", manager: Manag
         borderRadius: "3px",
         overviewRulerColor: baseColor.light,
         overviewRulerLane: vscode.OverviewRulerLane.Right,
+        opacity: "100%",
         light: {
             borderColor: hexColorWithOpacity(baseColor.light, opacity[1]),
             backgroundColor: hexColorWithOpacity(baseColor.light, opacity[0]),
+            color: "black",
         },
         dark: {
             borderColor: hexColorWithOpacity(baseColor.dark, opacity[1]),
             backgroundColor: hexColorWithOpacity(baseColor.dark, opacity[0]),
+            color: "white",
         },
     });
 }
 
-export function identifiersIn(ranges: vscode.Range[], decorationType: vscode.TextEditorDecorationType, manager: Manager, editor: vscode.TextEditor): void {
+export function dimmingDecoration(): vscode.TextEditorDecorationType {
+    return vscode.window.createTextEditorDecorationType({
+        opacity: "50%",
+    });
+}
+
+export function makeDecorations(decorationConfiguration: DecorationConfiguration): DecorationTypeManager {
+    return {
+        dim: dimmingDecoration(),
+        settings: {
+            manager: makeDecorationType("manager", "settings", decorationConfiguration),
+            variable: makeDecorationType("variable", "settings", decorationConfiguration),
+        },
+        state: {
+            manager: makeDecorationType("manager", "state", decorationConfiguration),
+            variable: makeDecorationType("variable", "state", decorationConfiguration),
+        },
+    };
+}
+
+export function identifiers(ranges: vscode.Range[], decorationType: vscode.TextEditorDecorationType, manager: Manager, editor: vscode.TextEditor): void {
     if (ranges.length === 0) return;
 
     const decorations = ranges.map(range => ({ range: range, hoverMessage: `Originates from ${manager}.` }));
     editor.setDecorations(decorationType, decorations);
 }
 
-/**
- * Never before have I come so close to writing Enterprise Java.
- */
-export function makeDecorationTypeManagerWith(decorationConfiguration: DecorationConfiguration): DecorationTypeManager {
-    return {
-        settings: {
-            manager: decorationTypeFor("manager", "settings", decorationConfiguration),
-            variable: decorationTypeFor("variable", "settings", decorationConfiguration),
-        },
-        state: {
-            manager: decorationTypeFor("manager", "state", decorationConfiguration),
-            variable: decorationTypeFor("variable", "state", decorationConfiguration),
-        },
-    };
+
+export function dim(range: vscode.Range, decorations: DecorationTypeManager, editor: vscode.TextEditor): void {
+    editor.setDecorations(decorations.dim, [range]);
 }
 
 /**
  * Dispose of the decorationTypes. You cannot re-use disposed types with `editor.setDecorations`, you will have to define new ones.
  * These are hard coded as TS got mad about nested Object.entries().
  */
-export function remove(decorationTypeManager: DecorationTypeManager): void {
-    if (!decorationTypeManager) return;
+export function remove(decorations: DecorationTypeManager): void {
+    if (!decorations) return;
 
-    decorationTypeManager.settings.manager.dispose();
-    decorationTypeManager.settings.variable.dispose();
-    decorationTypeManager.state.manager.dispose();
-    decorationTypeManager.state.variable.dispose();
-}
-
-
-
-
-
-
-function gray(): vscode.TextEditorDecorationType {
-    return vscode.window.createTextEditorDecorationType({
-        color: "gray",
-    });
-}
-
-export function muteOtherColors() {
-
+    decorations.dim.dispose();
+    decorations.settings.manager.dispose();
+    decorations.settings.variable.dispose();
+    decorations.state.manager.dispose();
+    decorations.state.variable.dispose();
 }

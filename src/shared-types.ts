@@ -8,6 +8,7 @@ export interface DecorationTypeSet {
 }
 
 export interface DecorationTypeManager {
+    dim: vscode.TextEditorDecorationType;
     state: DecorationTypeSet;
     settings: DecorationTypeSet;
 }

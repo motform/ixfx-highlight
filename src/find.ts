@@ -56,3 +56,16 @@ export function rangesMatching(identifiers: Set<string>, editor: vscode.TextEdit
     return ranges;
 }
 
+/**
+ * Return a Range enveloping the entire document. 
+ * TODO: Are there API methods for this? I could not find any, but that does not have to mean anything.
+ * @param editor 
+ * @returns vscode.Range
+ */
+export function entireText(editor: vscode.TextEditor): vscode.Range {
+    const lines = editor.document.getText().split(/\n/g);
+    const endLine = lines.length - 1;
+    const endCharacter = lines[endLine].length - 1;
+
+    return new vscode.Range(0, 0, endLine, endCharacter);
+}

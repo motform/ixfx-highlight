@@ -41,6 +41,10 @@
       {
         "command": "ixfx-highlight.toggle",
         "title": "ixfx: Toggle highlights"
+      },
+      {
+        "command": "ixfx-highlight.toggleLens",
+        "title": "ixfx: Toggle lens"
       }
     ],
     "configuration": {
