@@ -1,24 +1,24 @@
 import * as vscode from "vscode";
 import * as find from "./find";
 import * as decorate from "./decorate";
-import { Manager, DecorationTypeManager, DecorationConfiguration } from "./shared-types";
+import { Manager, Decorations, DecorationConfiguration } from "./shared-types";
 
 interface State {
     context?: vscode.ExtensionContext;
     decorationConfiguration: DecorationConfiguration;
-    decorationTypeManager: DecorationTypeManager;
+    decorations: Decorations;
     editor?: vscode.TextEditor;
     enabled: boolean;
     lensEnabled: boolean;
-    statusBarItem: vscode.StatusBarItem;
+    mainStatusBarItem: vscode.StatusBarItem;
     lensStatusBarItem: vscode.StatusBarItem;
 }
 
 let state: State = Object.freeze({
     enabled: false,
     lensEnabled: false,
-    decorationTypeManager: decorate.makeDecorations(vscode.workspace.getConfiguration("ixfx-highlight").get("color") as DecorationConfiguration), // TODO: This is a bit hacky/ugly and should probably be done in activate()
-    statusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 25),
+    decorations: decorate.makeDecorations(vscode.workspace.getConfiguration("ixfx-highlight").get("color") as DecorationConfiguration), // TODO: This is a bit hacky/ugly and should probably be done in activate()
+    mainStatusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 25),
     lensStatusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 26),
     decorationConfiguration: vscode.workspace.getConfiguration("ixfx-highlight").get("color") as DecorationConfiguration, // This means we are dealing with a proxy object, which I'm not all to familiar with, but I'm sure there is some quirk somewhere that I'm blissfully (?) unaware off.
 });
@@ -36,29 +36,29 @@ function updateState(newState: Partial<State>): void {
 }
 
 function updateHighlight(): void {
-    const { editor, context, decorationTypeManager, lensEnabled } = state;
+    const { editor, context, decorations, lensEnabled } = state;
     if (!editor) {
         console.error("No editor found in context", context);
         return;
     }
 
-    if (lensEnabled) { // Gray out the text if lens is enabled
+    if (lensEnabled) { // Dim the text if lens is enabled
         const range = find.entireText(editor);
-        decorate.dim(range, decorationTypeManager, editor);
+        decorate.dim(range, decorations, editor);
     }
 
     const managers: Manager[] = ["state", "settings"];
     for (const manager of managers) {
 
         { // Decorate variables 
-            const variables = find.variablesDestructuredFrom(manager, editor);
-            const ranges = find.rangesMatching(variables, editor);
-            decorate.identifiers(ranges, decorationTypeManager[manager].variable, manager, editor);
+            const variables = find.destructuredVaraibles(manager, editor);
+            const ranges = find.ranges(variables, editor);
+            decorate.identifiers(ranges, decorations[manager].variable, manager, editor);
         }
 
         { // Decorate managers 
-            const ranges = find.rangesMatching(find[manager], editor);
-            decorate.identifiers(ranges, decorationTypeManager[manager].manager, manager, editor);
+            const ranges = find.ranges(find[manager], editor);
+            decorate.identifiers(ranges, decorations[manager].manager, manager, editor);
         }
     }
 }
@@ -68,32 +68,32 @@ function enableHighlights(): void {
 
     if (enabled) return;
 
-    updateState({ enabled: true, decorationTypeManager: decorate.makeDecorations(decorationConfiguration) });
+    updateState({ enabled: true, decorations: decorate.makeDecorations(decorationConfiguration) });
     updateHighlight();
     updateStatusBarItem();
 }
 
 function disableHighlights(): void {
     updateState({ enabled: false });
-    decorate.remove(state.decorationTypeManager);
+    decorate.remove(state.decorations);
     updateStatusBarItem();
 }
 
 function updateStatusBarItem(): void {
-    const { statusBarItem, enabled, lensStatusBarItem, lensEnabled } = state;
-    statusBarItem.text = enabled ? `$(eye-closed) ixfx` : `$(eye) ixfx`;
+    const { mainStatusBarItem, enabled, lensStatusBarItem, lensEnabled } = state;
+    mainStatusBarItem.text = enabled ? `$(eye-closed) ixfx` : `$(eye) ixfx`;
     lensStatusBarItem.text = lensEnabled ? `$(filter)` : `$(filter-filled)`;
 }
 
 function showStatusBarItem(): void {
-    const { statusBarItem, lensStatusBarItem } = state;
-    statusBarItem.show();
+    const { mainStatusBarItem, lensStatusBarItem } = state;
+    mainStatusBarItem.show();
     lensStatusBarItem.show();
 }
 
 function hideStatusBarItem(): void {
-    const { statusBarItem, lensStatusBarItem } = state;
-    statusBarItem.hide();
+    const { mainStatusBarItem, lensStatusBarItem } = state;
+    mainStatusBarItem.hide();
     lensStatusBarItem.hide();
 }
 
@@ -114,11 +114,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 
     { // Create the status bar item.
-        const { statusBarItem, lensStatusBarItem } = state;
+        const { mainStatusBarItem, lensStatusBarItem } = state;
 
-        statusBarItem.command = "ixfx-highlight.toggle";
+        mainStatusBarItem.command = "ixfx-highlight.toggle";
         lensStatusBarItem.command = "ixfx-highlight.toggleLens";
-        context.subscriptions.push(statusBarItem, lensStatusBarItem);
+        context.subscriptions.push(mainStatusBarItem, lensStatusBarItem);
         updateStatusBarItem();
         supportedLangauge() ? showStatusBarItem() : hideStatusBarItem();
     }
@@ -133,7 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             updateState({
                 decorationConfiguration,
-                decorationTypeManager: decorate.makeDecorations(decorationConfiguration),
+                decorations: decorate.makeDecorations(decorationConfiguration),
             });
         }
     }, null, context.subscriptions);
@@ -141,11 +141,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     vscode.window.onDidChangeActiveTextEditor(editor => {
         updateState({ editor: editor });
-        const { enabled, decorationConfiguration, decorationTypeManager } = state;
+        const { enabled, decorationConfiguration, decorations: decorationTypeManager } = state;
 
         if (editor && supportedLangauge()) {
             if (enabled) {
-                updateState({ decorationTypeManager: decorate.makeDecorations(decorationConfiguration) });
+                updateState({ decorations: decorate.makeDecorations(decorationConfiguration) });
                 updateHighlight();
             }
 
@@ -158,12 +158,12 @@ export function activate(context: vscode.ExtensionContext) {
     }, null, context.subscriptions);
 
     vscode.window.onDidChangeActiveColorTheme(() => {
-        const { enabled, decorationConfiguration, decorationTypeManager } = state;
+        const { enabled, decorationConfiguration, decorations: decorationTypeManager } = state;
 
         if (enabled && supportedLangauge()) {
             // We need to make a new decorationTypeManager to get the dark-mode colors
             decorate.remove(decorationTypeManager);
-            updateState({ decorationTypeManager: decorate.makeDecorations(decorationConfiguration) });
+            updateState({ decorations: decorate.makeDecorations(decorationConfiguration) });
             updateHighlight();
         }
     }, null, context.subscriptions);
@@ -197,14 +197,14 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         vscode.commands.registerCommand("ixfx-highlight.toggleLens", () => {
-            const { lensEnabled, decorationTypeManager } = state;
+            const { lensEnabled, decorations } = state;
             if (supportedLangauge()) {
                 if (lensEnabled) {
                     updateState({ lensEnabled: false });
-                    decorationTypeManager.dim.dispose();
+                    decorations.dim.dispose();
                 } else {
                     updateState({ lensEnabled: true });
-                    decorationTypeManager.dim = decorate.dimmingDecoration();
+                    decorations.dim = decorate.dimmingDecoration();
                 }
 
                 updateStatusBarItem();
@@ -218,7 +218,7 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate(): void {
-    const { decorationTypeManager } = state;
+    const { decorations: decorationTypeManager } = state;
     decorate.remove(decorationTypeManager);
     hideStatusBarItem();
 }

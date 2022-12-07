@@ -12,7 +12,7 @@ const destructuringFrom = (manager: Manager) => new RegExp(`((let)|(const)|(var)
 /**
  * Return the unique variables in use by the manager.
  */
-export function variablesDestructuredFrom(manager: Manager, editor: vscode.TextEditor): Set<string> {
+export function destructuredVaraibles(manager: Manager, editor: vscode.TextEditor): Set<string> {
     const variables: Set<string> = new Set();
 
     const matches = editor.document.getText().matchAll(destructuringFrom(manager));
@@ -41,7 +41,7 @@ function concatOrRegex(identifiers: Set<string>): RegExp {
 /**
  * Return the ranges where identifiers occur in the current buffer.
  */
-export function rangesMatching(identifiers: Set<string>, editor: vscode.TextEditor): vscode.Range[] {
+export function ranges(identifiers: Set<string>, editor: vscode.TextEditor): vscode.Range[] {
     const ranges: vscode.Range[] = [];
     const regex = concatOrRegex(identifiers);
 

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Manager, DecorationConfiguration, DecorationTypeManager, Color } from "./shared-types";
+import { Manager, DecorationConfiguration, Decorations, Color } from "./shared-types";
 
 /**
  * Return a hexadecimal CSS color with opacity appended.
@@ -53,7 +53,7 @@ export function dimmingDecoration(): vscode.TextEditorDecorationType {
     });
 }
 
-export function makeDecorations(decorationConfiguration: DecorationConfiguration): DecorationTypeManager {
+export function makeDecorations(decorationConfiguration: DecorationConfiguration): Decorations {
     return {
         dim: dimmingDecoration(),
         settings: {
@@ -75,7 +75,7 @@ export function identifiers(ranges: vscode.Range[], decorationType: vscode.TextE
 }
 
 
-export function dim(range: vscode.Range, decorations: DecorationTypeManager, editor: vscode.TextEditor): void {
+export function dim(range: vscode.Range, decorations: Decorations, editor: vscode.TextEditor): void {
     editor.setDecorations(decorations.dim, [range]);
 }
 
@@ -83,7 +83,7 @@ export function dim(range: vscode.Range, decorations: DecorationTypeManager, edi
  * Dispose of the decorationTypes. You cannot re-use disposed types with `editor.setDecorations`, you will have to define new ones.
  * These are hard coded as TS got mad about nested Object.entries().
  */
-export function remove(decorations: DecorationTypeManager): void {
+export function remove(decorations: Decorations): void {
     if (!decorations) return;
 
     decorations.dim.dispose();
