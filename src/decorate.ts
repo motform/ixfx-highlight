@@ -64,6 +64,7 @@ export function makeDecorations(decorationConfiguration: DecorationConfiguration
             variable: makeDecorationType("variable", "state", decorationConfiguration),
         },
 
+        // XXX
         // Yes, there is a reason why `dim` is not in alphabetical order.
         // There is a very subtle potential for a "bug" here.
         // Being a disposable `vscode.TextEditorDecorationType` is not a value,
