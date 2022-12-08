@@ -27,7 +27,7 @@ function makeDecorationType(identiferType: "variable" | "manager", manager: Mana
             opacity = isVariable ? [30, 31] : [60, 61]; break;
     }
 
-    return vscode.window.createTextEditorDecorationType({
+    const options: vscode.DecorationRenderOptions = {
         borderWidth: "1px",
         borderStyle: "solid",
         borderRadius: "3px",
@@ -37,14 +37,14 @@ function makeDecorationType(identiferType: "variable" | "manager", manager: Mana
         light: {
             borderColor: hexColorWithOpacity(baseColor.light, opacity[1]),
             backgroundColor: hexColorWithOpacity(baseColor.light, opacity[0]),
-            color: "black",
         },
         dark: {
             borderColor: hexColorWithOpacity(baseColor.dark, opacity[1]),
             backgroundColor: hexColorWithOpacity(baseColor.dark, opacity[0]),
-            color: "white",
         },
-    });
+    };
+
+    return vscode.window.createTextEditorDecorationType(options);
 }
 
 export function dimmingDecoration(): vscode.TextEditorDecorationType {
@@ -83,7 +83,7 @@ export function dim(range: vscode.Range, decorations: Decorations, editor: vscod
  * Dispose of the decorationTypes. You cannot re-use disposed types with `editor.setDecorations`, you will have to define new ones.
  * These are hard coded as TS got mad about nested Object.entries().
  */
-export function remove(decorations: Decorations): void {
+export function removeAll(decorations: Decorations): void {
     if (!decorations) return;
 
     decorations.dim.dispose();
@@ -91,4 +91,9 @@ export function remove(decorations: Decorations): void {
     decorations.settings.variable.dispose();
     decorations.state.manager.dispose();
     decorations.state.variable.dispose();
+}
+
+export function removeDim(decorations: Decorations): void {
+    if (!decorations) return;
+    decorations.dim.dispose();
 }
