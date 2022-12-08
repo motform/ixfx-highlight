@@ -19,9 +19,13 @@ _ixfx Highlight_ is primarily an aid to students learning how to prototype inter
 
 ## Features
 
-_ixfx Highlight_ follows [ixfx convention](https://github.com/ClintH/ixfx-demos/blob/main/CODE-STYLE.md) and highlights instances of variable called `state` and `settings`, along with any destructured properties. You can turn the highlights on or off using the status bar icon in the bottom right.
+_ixfx Highlight_ follows [ixfx convention](https://github.com/ClintH/ixfx-demos/blob/main/CODE-STYLE.md) and highlights instances of variable called `state` and `settings`, along with any destructured properties. You can turn the highlights on or off using the status bar icon in the bottom right:
 
-![A screenshot of ixfx Highlight running in VS Code with a light theme.](resources/screenshot_dark.png)
+![A screenshot of ixfx Highlight running in VS Code with a light theme.](resources/main.gif)
+
+You can additonaly dim non-`state`/`settings` text using "lens mode":
+
+![A screenshot of ixfx Highlight running in VS Code with a light theme.](resources/lens.gif)
 
 I recommend pairing _ixfx Highlight_ with a restrained color theme, as busier ones might overpower the relatively subtle backgrounds. The screenshots use Niki Tonsky's [Alabaster](https://marketplace.visualstudio.com/items?itemName=tonsky.theme-alabaster) and Mike Hodgson's [Monochorme Dark](https://marketplace.visualstudio.com/items?itemName=mikehhodgson.monochrome-dark).
 
@@ -51,6 +55,10 @@ The current prototype has a few limitations, none of which should be disruptive.
 - Only highlights the active file (the active editor, in VS Code parlance). This becomes an issue when you split the view; it won't highlight an inactive but visible file, which stems from the fact that we only handle the active editor. It is not the biggest problem, but fixing it would require cross-editor state management, which is a potentially annoying thing to do in the VS Code API.
 
 ## Release Notes
+
+### 1.2.X
+
+Add lens mode, an additional modifier that dims any non `state`/`settings` text.
 
 ### 1.1.X
 
