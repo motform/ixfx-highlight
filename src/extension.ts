@@ -4,13 +4,17 @@ import * as decorate from "./decorate";
 import { Manager, Decorations, DecorationConfiguration } from "./shared-types";
 
 interface State {
+    // These are set on activation.
     context?: vscode.ExtensionContext;
+    editor?: vscode.TextEditor;
+
     decorationConfiguration: DecorationConfiguration;
     decorations: Decorations;
-    editor?: vscode.TextEditor;
+
     enabled: boolean;
     enabledFrom: "main" | "lens" | "disabled";
     lensEnabled: boolean;
+
     lensStatusBarItem: vscode.StatusBarItem;
     mainStatusBarItem: vscode.StatusBarItem;
 }
@@ -18,9 +22,11 @@ interface State {
 let state: State = Object.freeze({
     decorationConfiguration: vscode.workspace.getConfiguration("ixfx-highlight").get("color") as DecorationConfiguration, // This means we are dealing with a proxy object, which I'm not all to familiar with, but I'm sure there is some quirk somewhere that I'm blissfully (?) unaware off.
     decorations: decorate.makeDecorations(vscode.workspace.getConfiguration("ixfx-highlight").get("color") as DecorationConfiguration), // TODO: This is a bit hacky/ugly and should probably be done in activate()
+
     enabled: false,
     enabledFrom: "main",
     lensEnabled: false,
+
     lensStatusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 26),
     mainStatusBarItem: vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 25),
 });
@@ -159,7 +165,6 @@ export function activate(context: vscode.ExtensionContext) {
                 updateState({ decorations: decorate.makeDecorations(decorationConfiguration) });
                 updateHighlight();
             }
-
             updateStatusBarItems();
             showStatusBarItems();
         } else {
@@ -220,17 +225,17 @@ export function activate(context: vscode.ExtensionContext) {
                         decorate.removeDim(decorations);
                     }
                 } else {
-                    updateState({ lensEnabled: true });
-                    decorations.dim = decorate.dimmingDecoration();
-
-                    if (!enabled) { // Enable all the highlights when turning the lens on
+                    if (!enabled) { // Enable all the highlights when turning on the lens
                         updateState({
                             enabled: true,
                             decorations: decorate.makeDecorations(decorationConfiguration),
                             enabledFrom: "lens",
                         });
+                    } else {
+                        decorations.dim = decorate.dimmingDecoration();
                     }
 
+                    updateState({ lensEnabled: true });
                     updateHighlight();
                 }
 

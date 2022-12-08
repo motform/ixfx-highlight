@@ -55,7 +55,6 @@ export function dimmingDecoration(): vscode.TextEditorDecorationType {
 
 export function makeDecorations(decorationConfiguration: DecorationConfiguration): Decorations {
     return {
-        dim: dimmingDecoration(),
         settings: {
             manager: makeDecorationType("manager", "settings", decorationConfiguration),
             variable: makeDecorationType("variable", "settings", decorationConfiguration),
@@ -64,6 +63,25 @@ export function makeDecorations(decorationConfiguration: DecorationConfiguration
             manager: makeDecorationType("manager", "state", decorationConfiguration),
             variable: makeDecorationType("variable", "state", decorationConfiguration),
         },
+
+        // Yes, there is a reason why `dim` is not in alphabetical order.
+        // There is a very subtle potential for a "bug" here.
+        // Being a disposable `vscode.TextEditorDecorationType` is not a value,
+        // but a key/ handle for the styling decorations, registered somewhere
+        // in the VS Code internals. We can look at it with `.key`!
+        // Why does this matter? Well, dimming is stupid and simply
+        // applies the dimming decoration to all of the text.
+        // This dims state/settings highlight as well, UNLESS,
+        // they have already been applied (presumably overruled).
+        // As such, we need to make sure that dim is, not just
+        // applied last in code, but also has a key of a higher
+        // index (they are numbered as `"TextEditorDecorationType${N}"`).
+        // A decoration with a lower value will not be properly overruled,
+        // either thorugh order of application or some other aspect
+        // not documented in the spartan API.
+        // That is all, don't move this initialisation. Thanks.
+        // – LLA, 2022–12/08
+        dim: dimmingDecoration(),
     };
 }
 
@@ -86,11 +104,11 @@ export function dim(range: vscode.Range, decorations: Decorations, editor: vscod
 export function removeAll(decorations: Decorations): void {
     if (!decorations) return;
 
-    decorations.dim.dispose();
     decorations.settings.manager.dispose();
     decorations.settings.variable.dispose();
     decorations.state.manager.dispose();
     decorations.state.variable.dispose();
+    decorations.dim.dispose();
 }
 
 export function removeDim(decorations: Decorations): void {
